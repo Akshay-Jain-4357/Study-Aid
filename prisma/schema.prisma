@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// 1. Users & Authentication
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  fullName       String
+  university     String?
+  major          String?
+  semester       Int?
+  avatarUrl      String?
+  
+  planTier       PlanType  @default(FREE)
+  xpPoints       Int       @default(0)
+  currentStreak  Int       @default(0)
+  
+  createdAt      DateTime  @default(now()) @db.Timestamptz()
+  updatedAt      DateTime  @updatedAt @db.Timestamptz()
+
+  // Relationships
+  notes          Note[]
+  assignments    Assignment[]
+  aiConversations AiConversation[]
+  products       Product[]
+  purchases      Purchase[]
+  feedbacks      Feedback[]
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ELITE
+}
+
+// 2. Study Materials (Content Moat)
+model Note {
+  id             String    @id @default(uuid()) @db.Uuid
+  uploaderId     String
+  title          String
+  subject        String
+  universityTag  String?
+  semester       Int?
+  tags           String[]
+  documentUrl    String
+  
+  isPublic       Boolean   @default(true)
+  isPremium      Boolean   @default(false)
+  drmProtected   Boolean   @default(false)
+  downloads      Int       @default(0)
+  rating         Decimal?  @db.Decimal(3, 2)
+  
+  createdAt      DateTime  @default(now()) @db.Timestamptz()
+  
+  // Relationships
+  uploader       User      @relation(fields: [uploaderId], references: [id])
+}
+
+// 3. The Planner & Tasks
+model Assignment {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String
+  title          String
+  subject        String?
+  dueDate        DateTime  @db.Timestamptz()
+  
+  priority       Priority  @default(MEDIUM)
+  status         Status    @default(PENDING)
+  
+  createdAt      DateTime  @default(now()) @db.Timestamptz()
+
+  // Relationships
+  user           User      @relation(fields: [userId], references: [id])
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Status {
+  PENDING
+  SUBMITTED
+  OVERDUE
+}
+
+// 4. AI Interactions & Personalization (Data Moat)
+model AiConversation {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String
+  topic          String?
+  personaMode    String    @default("standard")
+  
+  createdAt      DateTime  @default(now()) @db.Timestamptz()
+  
+  // Relationships
+  user           User          @relation(fields: [userId], references: [id])
+  messages       AiMessage[]
+}
+
+model AiMessage {
+  id               String    @id @default(uuid()) @db.Uuid
+  conversationId   String    @db.Uuid
+  role             Role
+  content          String
+  timestamp        DateTime  @default(now()) @db.Timestamptz()
+
+  // Relationships
+  conversation     AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// 5. Creator Marketplace
+model Product {
+  id               String    @id @default(uuid()) @db.Uuid
+  creatorId        String
+  title            String
+  type             ProductType
+  price            Decimal   @db.Decimal(10, 2)
+  stripeProductId  String?
+  rating           Decimal?  @db.Decimal(3, 2)
+  totalSales       Int       @default(0)
+
+  createdAt        DateTime  @default(now()) @db.Timestamptz()
+
+  // Relationships
+  creator          User      @relation(fields: [creatorId], references: [id])
+  purchases        Purchase[]
+}
+
+enum ProductType {
+  NOTES
+  COURSE
+  MENTORSHIP
+  TOOLKIT
+}
+
+model Purchase {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String
+  productId        String    @db.Uuid
+  amountPaid       Decimal   @db.Decimal(10, 2)
+  purchasedAt      DateTime  @default(now()) @db.Timestamptz()
+
+  // Relationships
+  user             User      @relation(fields: [userId], references: [id])
+  product          Product   @relation(fields: [productId], references: [id])
+}
+
+// 6. User Feedback
+model Feedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?
+  type      String   // RATE, BUG, FEATURE, CONTACT
+  message   String
+  rating    Int?
+  
+  createdAt DateTime @default(now()) @db.Timestamptz()
+
+  user      User?    @relation(fields: [userId], references: [id])
+}
