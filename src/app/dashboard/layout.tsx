@@ -243,7 +243,7 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           </span>
         </div>
 
-        <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-8 h-8 rounded-lg" } }} />
+        <UserButton appearance={{ elements: { avatarBox: "w-8 h-8 rounded-full border border-white/10 shadow-lg" } }} />
       </div>
     </header>
   );
