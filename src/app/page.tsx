@@ -86,7 +86,7 @@ export default function LandingPage() {
               <div className="flex items-center gap-4">
                 <Link href="/dashboard" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Go to Dashboard</Link>
                 <div className="border-l border-white/10 pl-4 h-6 flex items-center">
-                  <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-8 h-8 rounded-md" } }} />
+                  <UserButton appearance={{ elements: { avatarBox: "w-8 h-8 rounded-md" } }} />
                 </div>
               </div>
             )}
