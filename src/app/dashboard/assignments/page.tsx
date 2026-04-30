@@ -1,180 +1,90 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, AlertCircle, Clock, Plus, Filter, X, Calendar } from 'lucide-react';
-import { mockAssignments } from '@/lib/mockData';
+import { CheckCircle, AlertCircle, PlusCircle, Target, Loader2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
-import type { Assignment } from '@/lib/types';
-
-const STATUS_CONFIG = {
-  pending: { label: 'Pending', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: Clock },
-  submitted: { label: 'Submitted', color: '#10b981', bg: 'rgba(16,185,129,0.12)', icon: CheckCircle },
-  graded: { label: 'Graded', color: '#6366f1', bg: 'rgba(99,102,241,0.12)', icon: CheckCircle },
-  overdue: { label: 'Overdue', color: '#ef4444', bg: 'rgba(239,68,68,0.12)', icon: AlertCircle },
-};
-
-const PRIORITY_CONFIG = {
-  high: { color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
-  medium: { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-  low: { color: '#6366f1', bg: 'rgba(99,102,241,0.1)' },
-};
 
 export default function AssignmentsPage() {
-  const [assignments, setAssignments] = useState<Assignment[]>(mockAssignments);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [showModal, setShowModal] = useState(false);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = filterStatus === 'all' ? assignments : assignments.filter(a => a.status === filterStatus);
-  const counts = {
-    all: assignments.length,
-    pending: assignments.filter(a => a.status === 'pending').length,
-    submitted: assignments.filter(a => a.status === 'submitted').length,
-    overdue: assignments.filter(a => a.status === 'overdue').length,
-  };
-
-  const markDone = (id: string) => {
-    setAssignments(prev => prev.map(a => a.id === id ? { ...a, status: 'submitted' as const } : a));
-  };
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const res = await fetch('/api/dashboard');
+        const json = await res.json();
+        if (res.ok) {
+          setAssignments(json.assignments || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch assignments", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssignments();
+  }, []);
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold mb-1">Assignments</h2>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Track deadlines, submissions & grades</p>
-        </div>
-        <button onClick={() => setShowModal(true)} className="btn-primary flex items-center gap-2 self-start">
-          <Plus size={16} /> Add Assignment
-        </button>
-      </motion.div>
-
-      {/* Stats */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Total', value: counts.all, color: '#6366f1' },
-          { label: 'Pending', value: counts.pending, color: '#f59e0b' },
-          { label: 'Submitted', value: counts.submitted, color: '#10b981' },
-          { label: 'Overdue', value: counts.overdue, color: '#ef4444' },
-        ].map((s) => (
-          <div key={s.label} className="stat-card text-center cursor-pointer" onClick={() => setFilterStatus(s.label.toLowerCase())}>
-            <div className="text-3xl font-black mb-1" style={{ color: s.color, fontFamily: 'Outfit' }}>{s.value}</div>
-            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{s.label}</div>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold mb-1">Assignments & Tasks</h2>
+            <p className="text-sm text-gray-400">Track and manage your study tasks</p>
           </div>
-        ))}
-      </motion.div>
-
-      {/* Filter Pills */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }}
-        className="flex gap-2 flex-wrap">
-        {['all', 'pending', 'submitted', 'overdue'].map((s) => (
-          <button key={s} onClick={() => setFilterStatus(s)}
-            className="px-4 py-1.5 rounded-lg text-sm capitalize font-medium transition-all"
-            style={{
-              background: filterStatus === s ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${filterStatus === s ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`,
-              color: filterStatus === s ? '#a5b4fc' : 'var(--text-muted)',
-            }}>
-            {s} {s === 'all' ? `(${counts.all})` : ''}
+          <button className="btn-primary py-2 px-4 rounded-xl text-sm font-medium flex items-center gap-2">
+            <PlusCircle size={16} /> New Task
           </button>
-        ))}
+        </div>
       </motion.div>
 
-      {/* List */}
-      <div className="space-y-3">
-        <AnimatePresence mode="popLayout">
-          {filtered.map((a, i) => {
-            const status = STATUS_CONFIG[a.status];
-            const priority = PRIORITY_CONFIG[a.priority];
-            const StatusIcon = status.icon;
-            const daysLeft = Math.ceil((new Date(a.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-
-            return (
-              <motion.div
-                key={a.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ delay: i * 0.05 }}
-                className="glass-card p-4 flex items-start gap-4"
-              >
-                <StatusIcon size={20} style={{ color: status.color, flexShrink: 0, marginTop: 2 }} />
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3 mb-1">
-                    <h4 className="font-semibold text-sm">{a.title}</h4>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold capitalize"
-                        style={{ background: priority.bg, color: priority.color }}>
-                        {a.priority}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
-                        style={{ background: status.bg, color: status.color }}>
-                        {status.label}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs" style={{ color: 'var(--text-muted)' }}>
-                    <span>{a.subject}</span>
-                    <span className="flex items-center gap-1">
-                      <Calendar size={11} /> {formatDate(a.dueDate)}
-                    </span>
-                    <span style={{ color: daysLeft < 0 ? '#ef4444' : daysLeft <= 2 ? '#f59e0b' : 'var(--text-muted)' }}>
-                      {daysLeft < 0 ? `${Math.abs(daysLeft)}d overdue` : daysLeft === 0 ? 'Due today' : `${daysLeft}d left`}
-                    </span>
-                  </div>
-                </div>
-
-                {a.status === 'pending' && (
-                  <button onClick={() => markDone(a.id)} className="flex-shrink-0 text-xs px-3 py-1.5 rounded-lg font-medium transition-all hover:bg-emerald-500/20"
-                    style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981', border: '1px solid rgba(16,185,129,0.25)' }}>
-                    Mark Done
-                  </button>
+      <div className="glass-card p-6 min-h-[50vh] flex flex-col">
+        {loading ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-indigo-400">
+            <Loader2 size={32} className="animate-spin mb-4" />
+            <p className="text-sm font-medium animate-pulse">Loading your tasks...</p>
+          </div>
+        ) : assignments.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+              <Target size={32} className="text-gray-400" />
+            </div>
+            <h4 className="text-lg font-bold mb-2">No tasks yet</h4>
+            <p className="text-sm text-gray-400 mb-6 max-w-[300px]">You haven't created any assignments or tasks. Start organizing your study schedule today.</p>
+            <button className="btn-primary py-2 px-6 rounded-xl text-sm font-medium flex items-center gap-2">
+              <PlusCircle size={16} /> Create Your First Task
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {assignments.map((a) => (
+              <div key={a.id} className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors border border-white/5 bg-white/[0.02]">
+                {a.status === 'SUBMITTED' ? (
+                  <CheckCircle size={20} className="text-emerald-500 mt-1 shrink-0" />
+                ) : a.status === 'OVERDUE' ? (
+                  <AlertCircle size={20} className="text-red-500 mt-1 shrink-0" />
+                ) : (
+                  <div className="w-5 h-5 rounded border-2 border-white/20 mt-1 shrink-0 cursor-pointer hover:border-indigo-400 transition-colors" />
                 )}
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-
-      {/* Add Assignment Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}
-            onClick={() => setShowModal(false)}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              onClick={e => e.stopPropagation()}
-              className="glass-card p-6 w-full max-w-md">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="font-bold">Add New Assignment</h3>
-                <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg hover:bg-white/10"><X size={16} /></button>
-              </div>
-              <div className="space-y-4">
-                <div><label className="form-label">Title</label><input className="input-field" placeholder="Assignment title..." /></div>
-                <div><label className="form-label">Subject</label><input className="input-field" placeholder="e.g. Data Structures" /></div>
-                <div><label className="form-label">Due Date</label><input type="date" className="input-field" /></div>
-                <div>
-                  <label className="form-label">Priority</label>
-                  <div className="flex gap-2">
-                    {['low', 'medium', 'high'].map(p => (
-                      <button key={p} className="flex-1 py-2 rounded-xl text-sm capitalize font-medium"
-                        style={{ background: PRIORITY_CONFIG[p as keyof typeof PRIORITY_CONFIG].bg, color: PRIORITY_CONFIG[p as keyof typeof PRIORITY_CONFIG].color, border: '1px solid rgba(255,255,255,0.08)' }}>
-                        {p}
-                      </button>
-                    ))}
+                <div className="flex-1 min-w-0">
+                  <div className="text-base font-medium truncate">{a.title}</div>
+                  <div className="text-sm text-gray-400 mt-1">
+                    {a.subject} · Due: {formatDate(a.dueDate)}
                   </div>
                 </div>
-                <button className="btn-primary w-full" onClick={() => setShowModal(false)}>Add Assignment</button>
+                <span className="badge text-xs px-3 py-1 rounded-full shrink-0" style={{
+                  background: a.priority === 'HIGH' ? 'rgba(239,68,68,0.15)' : a.priority === 'MEDIUM' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.08)',
+                  color: a.priority === 'HIGH' ? '#fca5a5' : a.priority === 'MEDIUM' ? '#fcd34d' : 'var(--text-muted)'
+                }}>
+                  {a.priority}
+                </span>
               </div>
-            </motion.div>
-          </motion.div>
+            ))}
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 }
