@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import {
-  Brain, BookOpen, Target, Clock, ArrowRight, UploadCloud, PlusCircle, Star, AlertCircle, CheckCircle2
+  Brain, BookOpen, Target, Clock, ArrowRight, UploadCloud, PlusCircle, Star, AlertCircle, CheckCircle2, Sparkles
 } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import { getGreeting, formatDate } from '@/lib/utils';
