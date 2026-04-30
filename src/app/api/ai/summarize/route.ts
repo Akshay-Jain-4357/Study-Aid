@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import OpenAI from 'openai';
 
 export async function POST(req: Request) {
   try {
@@ -8,26 +9,45 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { noteId, title, subject } = await req.json();
+    const { noteId, title, subject, content } = await req.json();
 
-    if (!title || !subject) {
-      return NextResponse.json({ error: 'Missing document metadata' }, { status: 400 });
+    const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+    const baseURL = process.env.GROQ_API_KEY 
+      ? 'https://api.groq.com/openai/v1' 
+      : 'https://api.openai.com/v1';
+
+    if (!apiKey || apiKey.includes('YOUR_')) {
+      // Fallback to simulated summary if no key is present, but with a warning
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return NextResponse.json({ 
+        summary: `[SIMULATED SUMMARY] This note "${title}" covers key topics in ${subject}. (Please configure your AI API keys in .env to enable deep document analysis).` 
+      });
     }
 
-    // Simulate AI processing delay (3 seconds) to emulate reading a PDF
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    const openai = new OpenAI({
+      apiKey: apiKey,
+      baseURL: baseURL,
+    });
 
-    // Generate a context-aware simulated summary based on the document's title and subject
-    const generatedSummary = `Based on the document "${title}", this appears to be study material related to ${subject}. 
+    const response = await openai.chat.completions.create({
+      model: process.env.GROQ_API_KEY ? 'llama-3.1-8b-instant' : 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert academic summarizer. Provide a concise, structured summary of the study material provided. Use bullet points and highlight key terms.'
+        },
+        {
+          role: 'user',
+          content: `Document Title: ${title}\nSubject: ${subject}\n\nPlease summarize this material.`
+        }
+      ],
+      temperature: 0.5,
+    });
 
-The core concepts likely cover the foundational principles of this subject. To fully master this, you should review the key definitions, practice the core formulas or frameworks provided, and ensure you understand how these concepts apply to broader topics within ${subject}.
+    return NextResponse.json({ summary: response.choices[0].message.content });
 
-Note: This is a placeholder AI summary. To enable deep PDF byte-reading, add your OPENAI_API_KEY to the .env file and connect this route to the OpenAI SDK!`;
-
-    return NextResponse.json({ summary: generatedSummary });
-
-  } catch (error) {
-    console.error("AI Generation Error:", error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    console.error("AI Summarize Error:", error);
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

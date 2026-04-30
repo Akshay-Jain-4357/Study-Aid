@@ -77,7 +77,7 @@ export async function POST(req: Request) {
           avatarUrl: image_url,
         }
       });
-      console.log(`User ${id} successfully synced to database.`);
+      // User successfully synced to database
     } catch (dbError) {
       console.error('Database Sync Error:', dbError);
       return new Response('Database Error', { status: 500 });
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
       await db.user.delete({
         where: { id: id }
       });
-      console.log(`User ${id} deleted from database.`);
+      // User deleted from database
     } catch (dbError) {
       console.error('Database Delete Error:', dbError);
     }

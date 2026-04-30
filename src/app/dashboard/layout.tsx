@@ -2,16 +2,15 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { UserButton, useUser, SignOutButton } from '@clerk/nextjs';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain, BookOpen, BarChart3, Clock, Target, Users, Settings,
   LogOut, Menu, X, Bell, Search, Zap, Home, Trophy, Shield,
-  CreditCard, Star, TrendingUp, MessageSquare, ChevronRight,
+  CreditCard, Star, TrendingUp, MessageSquare, ChevronLeft,
   Lock, Store
 } from 'lucide-react';
-import { getInitials } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: Home },
@@ -30,20 +29,26 @@ const BOTTOM_NAV = [
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
+interface Stats {
+  plan: string;
+  credits: string;
+  streak: number;
+  xp: number;
+}
+
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
+  stats: Stats | null;
 }
 
-function Sidebar({ open, onClose }: SidebarProps) {
+function Sidebar({ open, onClose, stats }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useUser();
   const userName = user?.fullName || 'Student';
-  const planName = 'PRO'; // Placeholder until Stripe is fully integrated
 
   return (
     <>
-      {/* Overlay on mobile */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -56,14 +61,12 @@ function Sidebar({ open, onClose }: SidebarProps) {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
       <motion.aside
         initial={false}
         animate={{ x: open ? 0 : undefined }}
         className={`sidebar ${open ? 'open' : ''}`}
         style={{ zIndex: 50 }}
       >
-        {/* Logo */}
         <div className="flex items-center justify-between mb-8">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--gradient-primary)' }}>
@@ -78,7 +81,6 @@ function Sidebar({ open, onClose }: SidebarProps) {
           </button>
         </div>
 
-        {/* User Card */}
         <div className="glass-card p-3 mb-6 flex items-center gap-3" style={{ borderRadius: '12px' }}>
           <div className="flex-shrink-0">
             <UserButton appearance={{ elements: { avatarBox: "w-10 h-10 rounded-xl" } }} />
@@ -87,13 +89,12 @@ function Sidebar({ open, onClose }: SidebarProps) {
             <div className="font-semibold text-sm truncate">{userName}</div>
             <div className="flex items-center gap-1.5">
               <span className="badge badge-primary text-xs" style={{ padding: '1px 8px', fontSize: '0.65rem' }}>
-                {planName}
+                {stats?.plan || 'FREE'}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Nav Items */}
         <nav className="flex-1 flex flex-col gap-1">
           <div className="text-xs font-semibold mb-2 px-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             Main Menu
@@ -121,18 +122,21 @@ function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         {/* Streak card */}
-        <div className="my-6 p-3 rounded-xl" style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg">🔥</span>
-            <span className="font-bold text-sm">3-Day Streak!</span>
+        <div className="my-6 p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">🔥</span>
+            <span className="font-bold text-sm tracking-tight">{stats?.streak || 0} Day Streak!</span>
           </div>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Keep it going — study at least 30 min today.</p>
-          <div className="progress-bar mt-2">
-            <div className="progress-fill" style={{ width: '65%' }} />
+          <p className="text-[10px] text-gray-400 leading-normal">Keep it going! Every day you learn is a step toward mastery.</p>
+          <div className="h-1.5 w-full bg-white/5 rounded-full mt-3 overflow-hidden">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: stats?.streak ? '100%' : '10%' }}
+              className="h-full bg-indigo-500" 
+            />
           </div>
         </div>
 
-        {/* Bottom Nav */}
         <div className="flex flex-col gap-1">
           {BOTTOM_NAV.map((item) => (
             <Link key={item.href} href={item.href} className="nav-link">
@@ -152,26 +156,14 @@ function Sidebar({ open, onClose }: SidebarProps) {
   );
 }
 
-function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
+function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats | null }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const isSubPage = pathname.split('/').length > 3;
   const pageTitle = NAV_ITEMS.find(n => n.href === pathname)?.label ?? 'Dashboard';
   
-  const [stats, setStats] = useState({ credits: '...', plan: 'FREE' });
   const [showNotifs, setShowNotifs] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const res = await fetch('/api/user/stats');
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data);
-        }
-      } catch (err) {}
-    }
-    fetchStats();
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -186,21 +178,25 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   return (
     <header className="sticky top-0 z-30 flex items-center gap-4 px-6 h-16"
       style={{ background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--border-subtle)' }}>
-      <button onClick={onMenuClick} className="lg:hidden p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)' }}>
+      <button onClick={onMenuClick} className="lg:hidden p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
         <Menu size={18} />
       </button>
+
+      {isSubPage ? (
+        <button onClick={() => router.back()} className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+          <ChevronLeft size={18} />
+        </button>
+      ) : null}
 
       <h1 className="font-bold text-lg flex-1">{pageTitle}</h1>
 
       <div className="flex items-center gap-3">
-        {/* Search */}
         <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)', minWidth: 200 }}>
           <Search size={15} style={{ color: 'var(--text-muted)' }} />
           <input placeholder="Quick search…" className="bg-transparent text-sm outline-none flex-1" style={{ color: 'var(--text-secondary)' }} />
           <kbd className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-muted)' }}>⌘K</kbd>
         </div>
 
-        {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button 
             onClick={() => setShowNotifs(!showNotifs)}
@@ -228,18 +224,17 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
                     <Bell size={16} className="text-gray-500" />
                   </div>
                   <p className="text-sm font-medium">You&apos;re all caught up!</p>
-                  <p className="text-xs text-gray-500 mt-1">No new alerts or updates right now.</p>
+                  <p className="text-xs text-gray-500 mt-1">No new alerts right now.</p>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* AI Credits */}
         <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
           <Brain size={15} style={{ color: '#a5b4fc' }} />
           <span className="text-xs font-semibold text-indigo-300">
-            {stats.credits} AI Credits
+            {stats?.credits || '0'} Credits
           </span>
         </div>
 
@@ -251,12 +246,26 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats, setStats] = useState<Stats | null>(null);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/user/stats');
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
+        }
+      } catch (err) {}
+    }
+    fetchStats();
+  }, []);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} stats={stats} />
       <div className="main-content">
-        <TopBar onMenuClick={() => setSidebarOpen(true)} />
+        <TopBar onMenuClick={() => setSidebarOpen(true)} stats={stats} />
         <main className="p-6">
           {children}
         </main>
