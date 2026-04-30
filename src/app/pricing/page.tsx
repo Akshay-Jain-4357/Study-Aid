@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { CheckCircle, Zap, ArrowRight, Shield, Star, Crown } from 'lucide-react';
+import { CheckCircle, Zap, ArrowRight, Shield, Loader2 } from 'lucide-react';
 import { useAuth, UserButton } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 const PLANS = [
   {
@@ -50,6 +52,40 @@ const FAQS = [
 export default function PricingPage() {
   const { isLoaded, userId } = useAuth();
   const isSignedIn = isLoaded && !!userId;
+  const [loading, setLoading] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleCheckout = async (planId: string) => {
+    if (!isSignedIn) {
+      router.push('/auth/signup');
+      return;
+    }
+
+    if (planId === 'free') {
+      router.push('/dashboard');
+      return;
+    }
+
+    setLoading(planId);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Something went wrong');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Checkout failed. Please check if your Stripe keys are configured.');
+    } finally {
+      setLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-white/20">
@@ -81,147 +117,46 @@ export default function PricingPage() {
       </nav>
 
       <div className="container mx-auto px-6 py-32">
-        {/* Header */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
           <span className="badge badge-warning mb-4">Transparent Pricing</span>
-          <h1 className="text-5xl font-black mb-4" style={{ fontFamily: 'Outfit' }}>
-            Choose Your <span className="gradient-text">Study Plan</span>
-          </h1>
-          <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
-            Start free, upgrade when you&apos;re ready. No hidden fees. Cancel anytime.
-          </p>
+          <h1 className="text-5xl font-black mb-4" style={{ fontFamily: 'Outfit' }}>Choose Your <span className="gradient-text">Study Plan</span></h1>
+          <p className="text-lg text-gray-400">Start free, upgrade when you're ready. No hidden fees. Cancel anytime.</p>
         </motion.div>
 
-        {/* Plans */}
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-20">
           {PLANS.map((plan, i) => (
-            <motion.div
-              key={plan.id}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.12 }}
-              whileHover={{ y: -6 }}
-              className="relative glass-card p-8"
-              style={{
-                borderColor: plan.border,
-                boxShadow: plan.popular ? `0 0 50px ${plan.color}20` : undefined,
-              }}
-            >
+            <motion.div key={plan.id} initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+              className="relative glass-card p-8 flex flex-col"
+              style={{ borderColor: plan.border, boxShadow: plan.popular ? `0 0 50px ${plan.color}20` : undefined }}>
               {plan.popular && (
                 <div className="absolute -top-4 left-0 right-0 flex justify-center">
                   <span className="badge badge-primary px-5 py-1.5 text-xs">⚡ Most Popular</span>
                 </div>
               )}
-
               <div className="text-3xl mb-4">{plan.icon}</div>
               <h2 className="text-2xl font-bold mb-1">{plan.name}</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>{plan.desc}</p>
-
-              <div className="flex items-end gap-1 mb-2">
-                <span className="text-5xl font-black" style={{ color: plan.color, fontFamily: 'Outfit' }}>
-                  {plan.price === 0 ? 'Free' : `₹${plan.price}`}
-                </span>
-                {plan.price > 0 && <span className="text-sm pb-1.5" style={{ color: 'var(--text-muted)' }}>/mo</span>}
+              <p className="text-xs text-gray-500 mb-6">{plan.desc}</p>
+              <div className="flex items-end gap-1 mb-8">
+                <span className="text-4xl font-black" style={{ color: plan.color, fontFamily: 'Outfit' }}>{plan.price === 0 ? 'Free' : `₹${plan.price}`}</span>
+                {plan.price > 0 && <span className="text-sm pb-1.5 text-gray-500">/mo</span>}
               </div>
-              {plan.annual > 0 && (
-                <p className="text-xs mb-6" style={{ color: '#10b981' }}>
-                  Save ₹{plan.price * 12 - plan.annual} · ₹{plan.annual}/year billed annually
-                </p>
-              )}
-
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    <CheckCircle size={15} className="flex-shrink-0 mt-0.5" style={{ color: plan.color }} />
-                    {f}
+              <ul className="space-y-3 mb-8 flex-1">
+                {plan.features.map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-400">
+                    <CheckCircle size={14} className="mt-1 shrink-0" style={{ color: plan.color }} /> {f}
                   </li>
                 ))}
               </ul>
-
-              <Link
-                href="/auth/signup"
-                className="block text-center w-full py-3 px-6 rounded-xl font-bold text-sm transition-all hover:-translate-y-1"
-                style={{
-                  background: plan.popular ? 'var(--gradient-primary)' : `${plan.color}18`,
-                  color: plan.popular ? 'white' : plan.color,
-                  border: `1px solid ${plan.border}`,
-                  boxShadow: plan.popular ? `0 8px 30px ${plan.color}40` : undefined,
-                }}
-              >
-                {plan.price === 0 ? 'Start Free — No CC Needed' : `Start ${plan.name} Plan`}
-              </Link>
-
-              {plan.popular && (
-                <p className="text-center text-xs mt-3" style={{ color: 'var(--text-muted)' }}>7-day free trial included</p>
-              )}
+              <button 
+                onClick={() => handleCheckout(plan.id)}
+                disabled={!!loading}
+                className="w-full py-3 px-6 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                style={{ background: plan.popular ? 'var(--gradient-primary)' : 'rgba(255,255,255,0.05)', color: plan.popular ? 'white' : 'white', border: `1px solid ${plan.border}` }}>
+                {loading === plan.id ? <Loader2 size={16} className="animate-spin" /> : (plan.price === 0 ? 'Start Free' : `Upgrade to ${plan.name}`)}
+              </button>
             </motion.div>
           ))}
         </div>
-
-        {/* Feature comparison */}
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-          className="glass-card overflow-x-auto mb-16">
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <th className="p-4 text-left font-semibold">Feature</th>
-                <th className="p-4 text-center">Free</th>
-                <th className="p-4 text-center" style={{ color: '#a5b4fc' }}>Pro</th>
-                <th className="p-4 text-center" style={{ color: '#fcd34d' }}>Elite</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ['AI Tutor Access', '10/day', 'Unlimited', 'Unlimited + Mentor'],
-                ['Note Storage', '5GB', '50GB', '200GB'],
-                ['PYQ Database', '—', '✅ Full Access', '✅ Full Access'],
-                ['Collaboration', '—', '✅', '✅ War Room'],
-                ['DRM PDF Streaming', '—', '—', '✅'],
-                ['Analytics', 'Basic', 'Advanced', 'AI-Powered'],
-                ['Support', 'Community', '2hr response', 'Priority 24/7'],
-                ['AI Study Roadmap', '—', '✅', '✅ Personalized'],
-              ].map(([feature, free, pro, elite]) => (
-                <tr key={feature} className="border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
-                  <td className="p-4 font-medium">{feature}</td>
-                  <td className="p-4 text-center" style={{ color: free === '—' ? 'var(--text-muted)' : 'var(--text-secondary)' }}>{free}</td>
-                  <td className="p-4 text-center" style={{ color: pro === '—' ? 'var(--text-muted)' : '#a5b4fc' }}>{pro}</td>
-                  <td className="p-4 text-center" style={{ color: elite === '—' ? 'var(--text-muted)' : '#fcd34d' }}>{elite}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </motion.div>
-
-        {/* FAQs */}
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-          className="max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8" style={{ fontFamily: 'Outfit' }}>
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            {FAQS.map((faq, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 + i * 0.06 }}
-                className="glass-card p-5">
-                <h4 className="font-semibold mb-2">{faq.q}</h4>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{faq.a}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Final CTA */}
-        <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7 }}
-          className="text-center">
-          <div className="inline-flex items-center gap-2 text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
-            <Shield size={14} />
-            30-day money-back guarantee · Cancel any time · No questions asked
-          </div>
-          <div>
-            <Link href="/auth/signup" className="btn-primary inline-flex items-center gap-2 text-base px-8 py-4">
-              Start Learning Today <ArrowRight size={18} />
-            </Link>
-          </div>
-        </motion.div>
       </div>
     </div>
   );
