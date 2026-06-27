@@ -36,17 +36,30 @@ export default async function NoteViewerPage({ params }: { params: { id: string 
 
   let viewUrl = note.documentUrl;
 
-  // Transform raw S3 links into secure, temporary Presigned URLs for DRM viewing
-  if (note.documentUrl.includes('amazonaws.com') && process.env.AWS_ACCESS_KEY_ID) {
+  // Transform raw storage links into secure, temporary Presigned URLs for DRM viewing
+  if (process.env.AWS_ACCESS_KEY_ID && (note.documentUrl.includes('storage.googleapis.com') || note.documentUrl.includes('amazonaws.com'))) {
     try {
-      const urlParts = note.documentUrl.split('.amazonaws.com/');
-      if (urlParts.length === 2) {
-        const s3Key = decodeURIComponent(urlParts[1]);
-        const bucketName = process.env.AWS_S3_BUCKET_NAME || 'study-aid-vault-2026';
-        
+      let storageKey = '';
+      const bucketName = process.env.AWS_S3_BUCKET_NAME || 'study-aid-vault-2026';
+
+      if (note.documentUrl.includes('storage.googleapis.com')) {
+        // GCS URL format: https://storage.googleapis.com/bucket/key
+        const gcsPrefix = `https://storage.googleapis.com/${bucketName}/`;
+        if (note.documentUrl.startsWith(gcsPrefix)) {
+          storageKey = decodeURIComponent(note.documentUrl.slice(gcsPrefix.length));
+        }
+      } else if (note.documentUrl.includes('amazonaws.com')) {
+        // AWS URL format: https://bucket.s3.region.amazonaws.com/key
+        const urlParts = note.documentUrl.split('.amazonaws.com/');
+        if (urlParts.length === 2) {
+          storageKey = decodeURIComponent(urlParts[1]);
+        }
+      }
+
+      if (storageKey) {
         const command = new GetObjectCommand({
           Bucket: bucketName,
-          Key: s3Key,
+          Key: storageKey,
         });
 
         // Generate a 60-minute presigned URL to enforce streaming-only access
