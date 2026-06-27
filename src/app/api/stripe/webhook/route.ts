@@ -3,11 +3,15 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { db } from '@/lib/db';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-01-27' as any,
-});
-
 export async function POST(req: Request) {
+  if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('YOUR_STRIPE')) {
+    return new NextResponse('Stripe not configured', { status: 500 });
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-01-27' as any,
+  });
+
   const body = await req.text();
   const signature = (await headers()).get('stripe-signature') as string;
 
@@ -48,3 +52,4 @@ export async function POST(req: Request) {
 
   return new NextResponse(null, { status: 200 });
 }
+

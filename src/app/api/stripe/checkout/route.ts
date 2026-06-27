@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-01-27' as any,
-});
-
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
@@ -22,11 +18,15 @@ export async function POST(req: Request) {
     }
 
     // Checking if Stripe is configured
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('sk_test_...')) {
+    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('YOUR_STRIPE')) {
       return NextResponse.json({ 
         error: 'Stripe is not configured. Please add your STRIPE_SECRET_KEY to the .env file.' 
       }, { status: 500 });
     }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-01-27' as any,
+    });
 
     // Mapping plan IDs to Price IDs (User needs to replace these with real Stripe Price IDs)
     const priceMap: Record<string, string> = {
@@ -65,3 +65,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+
