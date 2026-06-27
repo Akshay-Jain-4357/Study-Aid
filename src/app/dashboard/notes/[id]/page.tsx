@@ -35,6 +35,7 @@ export default async function NoteViewerPage({ params }: { params: { id: string 
   }
 
   let viewUrl = note.documentUrl;
+  let isDocx = note.documentUrl.toLowerCase().includes('.docx');
 
   // Transform raw storage links into secure, temporary Presigned URLs for DRM viewing
   if (process.env.AWS_ACCESS_KEY_ID && (note.documentUrl.includes('storage.googleapis.com') || note.documentUrl.includes('amazonaws.com'))) {
@@ -57,17 +58,37 @@ export default async function NoteViewerPage({ params }: { params: { id: string 
       }
 
       if (storageKey) {
+        let contentType = 'application/pdf'; // Default fallback
+        if (storageKey.toLowerCase().endsWith('.pdf')) {
+          contentType = 'application/pdf';
+        } else if (storageKey.toLowerCase().endsWith('.docx')) {
+          contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+          isDocx = true;
+        } else if (storageKey.toLowerCase().endsWith('.txt')) {
+          contentType = 'text/plain';
+        }
+
         const command = new GetObjectCommand({
           Bucket: bucketName,
           Key: storageKey,
+          ResponseContentType: contentType,
+          ResponseContentDisposition: 'inline',
         });
 
         // Generate a 60-minute presigned URL to enforce streaming-only access
-        viewUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+        const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+        
+        if (isDocx) {
+          viewUrl = `https://docs.google.com/gview?url=${encodeURIComponent(presignedUrl)}&embedded=true`;
+        } else {
+          viewUrl = presignedUrl;
+        }
       }
     } catch (err) {
       console.error("Failed to generate presigned URL", err);
     }
+  } else if (isDocx) {
+    viewUrl = `https://docs.google.com/gview?url=${encodeURIComponent(note.documentUrl)}&embedded=true`;
   }
 
   return (
@@ -114,7 +135,7 @@ export default async function NoteViewerPage({ params }: { params: { id: string 
           {/* Real Document Iframe */}
           <div className="flex-1 w-full h-full bg-[#1e1e1e]">
             <iframe 
-              src={`${viewUrl}#toolbar=0&navpanes=0&scrollbar=0`} 
+              src={isDocx ? viewUrl : `${viewUrl}#toolbar=0&navpanes=0&scrollbar=0`} 
               className="w-full h-full border-0"
               title={note.title}
             />
