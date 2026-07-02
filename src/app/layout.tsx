@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ClerkProvider } from '@clerk/nextjs'
+import ClientClerkProvider from '@/components/ClientClerkProvider';
 import FeedbackButton from '@/components/FeedbackButton';
 import ThemeProvider from '@/components/ThemeProvider';
 import { dark } from '@clerk/themes';
@@ -20,93 +20,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider appearance={{
-      baseTheme: dark,
-      variables: {
-        colorPrimary: '#E8A832',
-        colorBackground: '#111114',
-        colorInputBackground: '#1F1F25',
-        colorInputText: '#EAEAF0',
-        colorText: '#EAEAF0',
-        colorTextSecondary: '#A8A8C0',
-        borderRadius: '10px',
-        fontFamily: "'Satoshi', 'Inter', system-ui, sans-serif",
-      },
-      elements: {
-        card: {
-          backgroundColor: '#111114',
-          border: '1px solid rgba(58, 58, 71, 0.5)',
-          borderRadius: '14px',
-        },
-        headerTitle: {
-          color: '#EAEAF0',
-          fontFamily: "'Instrument Serif', Georgia, serif",
-          fontWeight: 400,
-          letterSpacing: '-0.03em',
-        },
-        headerSubtitle: {
-          color: '#A8A8C0',
-        },
-        socialButtonsBlockButton: {
-          backgroundColor: '#1F1F25',
-          border: '1px solid rgba(58, 58, 71, 0.5)',
-          color: '#EAEAF0',
-        },
-        socialButtonsBlockButtonText: {
-          color: '#EAEAF0',
-        },
-        dividerText: {
-          color: '#A8A8C0',
-        },
-        formFieldLabel: {
-          color: '#A8A8C0',
-        },
-        formFieldInput: {
-          backgroundColor: '#1F1F25',
-          color: '#EAEAF0',
-          border: '1px solid rgba(58, 58, 71, 0.5)',
-        },
-        formButtonPrimary: {
-          background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
-          color: '#0A0A0C',
-          fontWeight: 700,
-          fontFamily: "'Satoshi', sans-serif",
-          borderRadius: '10px',
-          boxShadow: '0 2px 8px rgba(232, 168, 50, 0.25)',
-        },
-        footerActionLink: {
-          color: '#E8A832',
-        },
-        footerActionText: {
-          color: '#A8A8C0',
-        },
-        identityPreviewEditButton: {
-          color: '#E8A832',
-        },
-        identityPreviewText: {
-          color: '#EAEAF0',
-        },
-        userButtonPopoverCard: {
-          backgroundColor: '#111114',
-          border: '1px solid rgba(58, 58, 71, 0.5)',
-        },
-        userButtonPopoverActionButton: {
-          color: '#EAEAF0',
-        },
-        userButtonPopoverActionButtonText: {
-          color: '#EAEAF0',
-        },
-        userButtonPopoverActionButtonIcon: {
-          color: '#A8A8C0',
-        },
-        userPreviewMainIdentifier: {
-          color: '#EAEAF0',
-        },
-        userPreviewSecondaryIdentifier: {
-          color: '#A8A8C0',
-        },
-      },
-    }}>
+    <ClientClerkProvider>
       <html lang="en" data-theme="dark" suppressHydrationWarning>
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -137,6 +51,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </ThemeProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </ClientClerkProvider>
   );
 }

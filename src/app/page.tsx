@@ -83,8 +83,8 @@ export default function LandingPage() {
               gap: '8px',
               padding: '6px 16px',
               borderRadius: '99px',
-              background: 'rgba(232, 168, 50, 0.08)',
-              border: '1px solid rgba(232, 168, 50, 0.2)',
+              background: 'var(--bg-hover-strong)',
+              border: '1px solid var(--border-amber-medium)',
               fontFamily: "'Satoshi', sans-serif",
               fontSize: '0.75rem',
               fontWeight: 700,
@@ -175,19 +175,17 @@ export default function LandingPage() {
                     fontWeight: 700,
                     color: '#0A0A0C',
                     textDecoration: 'none',
-                    background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
+                    background: 'var(--gradient-amber)',
                     padding: '0.875rem 2rem',
                     borderRadius: 'var(--radius-md)',
-                    boxShadow: '0 4px 20px rgba(232, 168, 50, 0.35)',
+                    boxShadow: 'var(--shadow-amber-glow)',
                     transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 0 30px rgba(232,168,50,0.4), 0 8px 30px rgba(232,168,50,0.15)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(232, 168, 50, 0.35)';
                   }}
                 >
                   Start Free
@@ -207,10 +205,10 @@ export default function LandingPage() {
                     fontWeight: 700,
                     color: '#0A0A0C',
                     textDecoration: 'none',
-                    background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
+                    background: 'var(--gradient-amber)',
                     padding: '0.875rem 2rem',
                     borderRadius: 'var(--radius-md)',
-                    boxShadow: '0 4px 20px rgba(232, 168, 50, 0.35)',
+                    boxShadow: 'var(--shadow-amber-glow)',
                   }}
                 >
                   Go to Dashboard →
@@ -236,7 +234,7 @@ export default function LandingPage() {
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = 'var(--amber-500)';
-                  e.currentTarget.style.background = 'rgba(232,168,50,0.04)';
+                  e.currentTarget.style.background = 'var(--bg-hover-light)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = 'var(--border-default)';
@@ -552,10 +550,10 @@ function FragmentedVsUnifiedDiagram() {
       {/* Unified */}
       <div style={{
         background: 'var(--bg-card)',
-        border: '1px solid rgba(232,168,50,0.2)',
+        border: '1px solid var(--border-amber-medium)',
         borderRadius: 'var(--radius-lg)',
         padding: '24px',
-        boxShadow: '0 0 40px rgba(232,168,50,0.05)',
+        boxShadow: 'var(--shadow-amber-glow)',
       }}>
         <div style={{
           fontFamily: "'Satoshi', sans-serif",
@@ -572,8 +570,8 @@ function FragmentedVsUnifiedDiagram() {
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
-          background: 'rgba(232,168,50,0.06)',
-          border: '1px solid rgba(232,168,50,0.12)',
+          background: 'var(--bg-hover-light)',
+          border: '1px solid var(--border-amber-subtle)',
           borderRadius: 'var(--radius-md)',
           padding: '16px',
         }}>
@@ -581,7 +579,7 @@ function FragmentedVsUnifiedDiagram() {
             width: '40px',
             height: '40px',
             borderRadius: 'var(--radius-sm)',
-            background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
+            background: 'var(--gradient-amber)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

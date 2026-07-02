@@ -37,8 +37,8 @@ export default function Footer() {
     <footer style={{ position: 'relative', overflow: 'hidden' }}>
       {/* CTA band */}
       <div style={{
-        background: 'linear-gradient(165deg, rgba(232,168,50,0.08) 0%, rgba(45,212,168,0.04) 100%)',
-        borderTop: '1px solid rgba(232,168,50,0.15)',
+        background: 'var(--gradient-card-hover)',
+        borderTop: '1px solid var(--border-amber-subtle)',
         padding: '80px 24px',
         textAlign: 'center',
       }}>
@@ -83,11 +83,11 @@ export default function Footer() {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 0 30px rgba(232,168,50,0.35), 0 0 80px rgba(232,168,50,0.1)';
+            e.currentTarget.style.boxShadow = 'var(--shadow-amber-glow)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 16px rgba(232, 168, 50, 0.3)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(232,168,50,0.25)';
           }}
         >
           Create Free Account

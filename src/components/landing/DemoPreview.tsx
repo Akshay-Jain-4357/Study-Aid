@@ -67,8 +67,9 @@ export default function DemoPreview() {
       ref={ref}
       style={{
         padding: '120px 24px',
-        background: 'linear-gradient(180deg, transparent 0%, rgba(232,168,50,0.03) 50%, transparent 100%)',
+        background: 'var(--bg-gradient-soft)',
         borderTop: '1px solid var(--border-subtle)',
+        position: 'relative'
       }}
     >
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
@@ -186,8 +187,8 @@ export default function DemoPreview() {
                           gap: '12px',
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = 'rgba(232,168,50,0.3)';
-                          e.currentTarget.style.background = 'rgba(232,168,50,0.04)';
+                          e.currentTarget.style.borderColor = 'var(--border-amber-medium)';
+                          e.currentTarget.style.background = 'var(--bg-hover-light)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.borderColor = 'var(--border-subtle)';
@@ -235,14 +236,14 @@ export default function DemoPreview() {
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                     <div style={{
                       width: '32px', height: '32px', borderRadius: '8px',
-                      background: 'rgba(232,168,50,0.12)', border: '1px solid rgba(232,168,50,0.2)',
+                      background: 'var(--bg-hover-strong)', border: '1px solid var(--border-amber-subtle)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '14px', flexShrink: 0, color: 'var(--amber-500)',
                       fontWeight: 700,
                     }}>✦</div>
                     <div style={{
-                      background: 'rgba(232,168,50,0.05)',
-                      border: '1px solid rgba(232,168,50,0.12)',
+                      background: 'var(--bg-hover-light)',
+                      border: '1px solid var(--border-amber-subtle)',
                       borderRadius: '14px 14px 14px 4px',
                       padding: '14px 18px',
                       fontFamily: "'Satoshi', sans-serif",

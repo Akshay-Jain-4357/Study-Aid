@@ -97,10 +97,10 @@ export default function DashboardPage() {
           <motion.div
             className="flex items-center gap-2 px-4 py-2 rounded-xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(232,168,50,0.1), rgba(240,192,96,0.06))',
-              border: '1px solid rgba(232,168,50,0.15)',
+              background: 'var(--bg-hover-strong)',
+              border: '1px solid var(--border-amber-subtle)',
             }}
-            whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(232,168,50,0.12)' }}
+            whileHover={{ scale: 1.05, boxShadow: 'var(--shadow-amber-glow)' }}
           >
             <motion.span
               className="text-lg"
@@ -191,13 +191,13 @@ export default function DashboardPage() {
             {isNewUser && (
               <motion.div variants={fadeInUp} className="glass-card p-8 relative overflow-hidden"
                 style={{
-                  borderColor: 'rgba(232,168,50,0.15)',
-                  background: 'linear-gradient(135deg, rgba(232,168,50,0.04), rgba(45,212,168,0.02), rgba(56,189,248,0.01))',
+                  borderColor: 'var(--border-amber-subtle)',
+                  background: 'var(--bg-gradient-soft)',
                 }}>
                 {/* Animated background glow */}
                 <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
                   style={{
-                    background: 'radial-gradient(circle, rgba(232,168,50,0.06) 0%, transparent 70%)',
+                    background: 'var(--bg-hover-light)',
                     filter: 'blur(40px)',
                   }} />
 
@@ -252,7 +252,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-bold flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                      style={{ background: 'rgba(232,168,50,0.1)', border: '1px solid rgba(232,168,50,0.15)' }}>
+                      style={{ background: 'var(--bg-hover-strong)', border: '1px solid var(--border-amber-subtle)' }}>
                       <BookOpen size={16} style={{ color: 'var(--accent-primary)' }} />
                     </div>
                     Latest Notes
@@ -293,7 +293,7 @@ export default function DashboardPage() {
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                              style={{ background: 'rgba(232,168,50,0.06)', border: '1px solid rgba(232,168,50,0.12)' }}>
+                              style={{ background: 'var(--bg-hover-light)', border: '1px solid var(--border-amber-subtle)' }}>
                               <BookOpen size={14} style={{ color: 'var(--accent-primary)' }} />
                             </div>
                             <div>

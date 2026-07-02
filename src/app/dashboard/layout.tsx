@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { UserButton, useUser, SignOutButton } from '@clerk/nextjs';
 import { motion, AnimatePresence } from 'framer-motion';
+import ThemeToggle from '@/components/ThemeToggle';
 import { useTheme } from '@/components/ThemeProvider';
 import {
   Brain, BookOpen, BarChart3, Clock, Target, Users, Settings,
@@ -71,7 +72,7 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
         <div className="flex items-center justify-between mb-8">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)' }}>
+              style={{ background: 'var(--gradient-amber)' }}>
               <span className="text-[#0A0A0C] font-bold text-sm relative z-10" style={{ fontFamily: "'Instrument Serif', serif" }}>S</span>
               <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
@@ -80,7 +81,7 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
             </span>
           </Link>
           <button onClick={onClose} className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-            style={{ background: 'rgba(232,168,50,0.08)' }}>
+            style={{ background: 'var(--bg-hover-strong)' }}>
             <X size={16} />
           </button>
         </div>
@@ -117,7 +118,7 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
                 <motion.div
                   className="flex items-center justify-center w-8 h-8 rounded-lg"
                   style={{
-                    background: isActive ? 'rgba(232,168,50,0.12)' : 'transparent',
+                    background: isActive ? 'var(--bg-hover-strong)' : 'transparent',
                   }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -141,14 +142,14 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
         {/* Streak Card */}
         <div className="my-4 p-4 rounded-2xl relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(232,168,50,0.1) 0%, rgba(45,212,168,0.06) 100%)',
-            border: '1px solid rgba(232,168,50,0.15)',
+            background: 'var(--gradient-card-hover)',
+            border: '1px solid var(--border-amber-subtle)',
           }}>
           {/* Animated shimmer overlay */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="w-full h-full animate-shimmer"
               style={{
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent)',
+                background: 'var(--gradient-shimmer)',
               }} />
           </div>
           <div className="flex items-center gap-2 mb-2 relative z-10">
@@ -165,7 +166,7 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
             Keep it going! Every day counts toward mastery.
           </p>
           <div className="h-1.5 w-full rounded-full mt-3 overflow-hidden relative z-10"
-            style={{ background: 'rgba(255,255,255,0.06)' }}>
+            style={{ background: 'var(--bg-overlay)' }}>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: stats?.streak ? '100%' : '10%' }}
@@ -199,7 +200,6 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
 function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats | null }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
   const isSubPage = pathname.split('/').length > 3;
   const pageTitle = NAV_ITEMS.find(n => n.href === pathname)?.label ?? 'Dashboard';
 
@@ -228,7 +228,7 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
       }}>
       <button onClick={onMenuClick}
         className="lg:hidden p-2 rounded-xl transition-all hover:scale-105"
-        style={{ background: 'rgba(232,168,50,0.06)', border: '1px solid var(--border-subtle)' }}>
+        style={{ background: 'var(--bg-hover)', border: '1px solid var(--border-subtle)' }}>
         <Menu size={18} />
       </button>
 
@@ -251,9 +251,9 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
         <motion.div
           className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl"
           style={{
-            background: searchFocused ? 'rgba(232,168,50,0.06)' : 'var(--bg-card)',
-            border: `1px solid ${searchFocused ? 'var(--amber-500)' : 'var(--border-subtle)'}`,
-            boxShadow: searchFocused ? '0 0 20px rgba(232,168,50,0.08)' : 'none',
+            background: searchFocused ? 'var(--bg-hover)' : 'var(--bg-card)',
+            border: `1px solid ${searchFocused ? 'var(--accent-primary)' : 'var(--border-subtle)'}`,
+            boxShadow: searchFocused ? 'var(--shadow-amber-glow)' : 'none',
             minWidth: 220,
             transition: 'all 0.3s ease',
           }}
@@ -272,39 +272,14 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
           </kbd>
         </motion.div>
 
-        {/* Theme Toggle */}
-        <motion.button
-          onClick={toggleTheme}
-          className="p-2.5 rounded-xl transition-all relative overflow-hidden"
-          style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-subtle)',
-          }}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-          <AnimatePresence mode="wait">
-            {theme === 'dark' ? (
-              <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                <Sun size={16} style={{ color: 'var(--accent-warning)' }} />
-              </motion.div>
-            ) : (
-              <motion.div key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                <Moon size={16} style={{ color: 'var(--accent-secondary)' }} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.button>
-
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <motion.button
             onClick={() => setShowNotifs(!showNotifs)}
             className="relative p-2.5 rounded-xl transition-all"
             style={{
-              background: showNotifs ? 'rgba(232,168,50,0.08)' : 'var(--bg-card)',
-              border: `1px solid ${showNotifs ? 'var(--amber-500)' : 'var(--border-subtle)'}`,
+              background: showNotifs ? 'var(--bg-hover-strong)' : 'var(--bg-card)',
+              border: `1px solid ${showNotifs ? 'var(--accent-primary)' : 'var(--border-subtle)'}`,
             }}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
@@ -314,7 +289,7 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
               className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
               style={{
                 background: 'var(--gradient-amber)',
-                boxShadow: '0 0 6px rgba(232,168,50,0.5)',
+                boxShadow: 'var(--shadow-amber-glow)',
               }}
               animate={{ scale: [1, 1.3, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -357,14 +332,19 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
           </AnimatePresence>
         </div>
 
+        {/* Theme Toggle */}
+        <div className="hidden sm:block">
+          <ThemeToggle />
+        </div>
+
         {/* Credits Badge */}
         <motion.div
           className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl"
           style={{
-            background: 'rgba(232,168,50,0.08)',
-            border: '1px solid rgba(232,168,50,0.15)',
+            background: 'var(--bg-hover-strong)',
+            border: '1px solid var(--border-amber-subtle)',
           }}
-          whileHover={{ scale: 1.03, boxShadow: '0 0 20px rgba(232,168,50,0.12)' }}
+          whileHover={{ scale: 1.03, boxShadow: 'var(--shadow-amber-glow)' }}
         >
           <Sparkles size={14} style={{ color: 'var(--accent-primary)' }} />
           <span className="text-xs font-bold" style={{ color: 'var(--accent-primary)' }}>
@@ -375,7 +355,7 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
         {/* Avatar */}
         <UserButton appearance={{
           elements: {
-            avatarBox: "w-8 h-8 rounded-xl border border-[rgba(232,168,50,0.15)] shadow-lg ring-2 ring-[rgba(232,168,50,0.08)]"
+            avatarBox: "w-8 h-8 rounded-xl border border-[var(--border-amber-subtle)] shadow-lg ring-2 ring-[var(--bg-hover-strong)]"
           }
         }} />
       </div>

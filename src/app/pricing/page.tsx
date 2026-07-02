@@ -200,7 +200,7 @@ export default function PricingPage() {
                   top: '-12px',
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
+                  background: 'var(--gradient-amber)',
                   color: '#0A0A0C',
                   fontFamily: "'Satoshi', sans-serif",
                   fontSize: '0.6875rem',
@@ -305,10 +305,10 @@ export default function PricingPage() {
                   transition: 'all 0.25s',
                   border: plan.popular ? 'none' : `1px solid ${plan.accentRaw}40`,
                   background: plan.popular
-                    ? 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)'
+                    ? 'var(--gradient-amber)'
                     : 'transparent',
                   color: plan.popular ? '#0A0A0C' : 'var(--text-primary)',
-                  boxShadow: plan.popular ? '0 4px 16px rgba(232,168,50,0.25)' : 'none',
+                  boxShadow: plan.popular ? 'var(--shadow-amber-glow)' : 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -372,7 +372,7 @@ export default function PricingPage() {
                   borderRadius: 'var(--radius-md)',
                   overflow: 'hidden',
                   transition: 'border-color 0.2s',
-                  borderColor: openFaq === i ? 'rgba(232,168,50,0.2)' : 'var(--border-subtle)',
+                  borderColor: openFaq === i ? 'var(--border-amber-medium)' : 'var(--border-subtle)',
                 }}
               >
                 <button

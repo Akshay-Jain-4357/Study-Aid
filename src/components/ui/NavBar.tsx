@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth, UserButton } from '@clerk/nextjs';
 import { motion, AnimatePresence } from 'framer-motion';
+import ThemeToggle from '../ThemeToggle';
 
 const NAV_LINKS = [
   { label: 'Features', href: '/#features' },
@@ -114,6 +115,7 @@ export default function NavBar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex" style={{ alignItems: 'center', gap: '16px' }}>
+            <ThemeToggle />
             {!isSignedIn ? (
               <>
                 <Link
@@ -147,7 +149,7 @@ export default function NavBar() {
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-1px)';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(232,168,50,0.3), 0 0 60px rgba(232,168,50,0.08)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-amber-glow)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
@@ -310,6 +312,10 @@ export default function NavBar() {
                 </Link>
               ) : null}
             </motion.div>
+            
+            <div style={{ marginTop: '32px' }}>
+              <ThemeToggle />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
