@@ -39,9 +39,32 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           borderRadius: '14px',
         },
         headerTitle: {
+          color: '#EAEAF0',
           fontFamily: "'Instrument Serif', Georgia, serif",
           fontWeight: 400,
           letterSpacing: '-0.03em',
+        },
+        headerSubtitle: {
+          color: '#A8A8C0',
+        },
+        socialButtonsBlockButton: {
+          backgroundColor: '#1F1F25',
+          border: '1px solid rgba(58, 58, 71, 0.5)',
+          color: '#EAEAF0',
+        },
+        socialButtonsBlockButtonText: {
+          color: '#EAEAF0',
+        },
+        dividerText: {
+          color: '#A8A8C0',
+        },
+        formFieldLabel: {
+          color: '#A8A8C0',
+        },
+        formFieldInput: {
+          backgroundColor: '#1F1F25',
+          color: '#EAEAF0',
+          border: '1px solid rgba(58, 58, 71, 0.5)',
         },
         formButtonPrimary: {
           background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
@@ -54,8 +77,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         footerActionLink: {
           color: '#E8A832',
         },
+        footerActionText: {
+          color: '#A8A8C0',
+        },
         identityPreviewEditButton: {
           color: '#E8A832',
+        },
+        identityPreviewText: {
+          color: '#EAEAF0',
+        },
+        userButtonPopoverCard: {
+          backgroundColor: '#111114',
+          border: '1px solid rgba(58, 58, 71, 0.5)',
+        },
+        userButtonPopoverActionButton: {
+          color: '#EAEAF0',
+        },
+        userButtonPopoverActionButtonText: {
+          color: '#EAEAF0',
+        },
+        userButtonPopoverActionButtonIcon: {
+          color: '#A8A8C0',
+        },
+        userPreviewMainIdentifier: {
+          color: '#EAEAF0',
+        },
+        userPreviewSecondaryIdentifier: {
+          color: '#A8A8C0',
         },
       },
     }}>
