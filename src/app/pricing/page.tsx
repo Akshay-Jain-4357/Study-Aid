@@ -1,58 +1,80 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { CheckCircle, Zap, ArrowRight, Shield, Loader2 } from 'lucide-react';
 import { useAuth, UserButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 
+import NavBar from '@/components/ui/NavBar';
+import Footer from '@/components/ui/Footer';
+
 const PLANS = [
   {
-    id: 'free', name: 'Free', price: 0, annual: 0, period: '/month',
-    desc: 'Best for getting started', icon: '🎓',
-    color: '#475569', border: 'rgba(71,85,105,0.3)',
+    id: 'free', name: 'Starter', price: 0, annual: 0,
+    desc: 'Everything you need to get started.',
+    accent: 'var(--carbon-400)',
+    accentRaw: '#7B7B99',
     features: [
-      '5 Note uploads/month', '10 AI Tutor queries/day', 'Basic Study Planner',
-      'Community Access', '5GB Storage', 'Basic Analytics',
+      '5 note uploads per month',
+      '10 AI Tutor queries per day',
+      'Basic Study Planner',
+      '5GB encrypted storage',
+      'Community access',
+      'Basic analytics',
     ],
   },
   {
-    id: 'pro', name: 'Pro', price: 99, annual: 799, period: '/month',
-    desc: 'For serious academic achievers', icon: '⚡',
-    color: '#6366f1', border: 'rgba(99,102,241,0.5)',
+    id: 'pro', name: 'Pro', price: 99, annual: 799,
+    desc: 'For students who mean business.',
+    accent: 'var(--amber-500)',
+    accentRaw: '#E8A832',
     popular: true,
     features: [
-      'Unlimited Note uploads', 'Unlimited AI Tutor', 'Advanced Performance Analytics',
-      '50GB Secure Storage', 'Full PYQ Database Access', 'Priority Support (2hr SLA)',
-      'Study Collaboration Rooms', 'Offline Study Mode', 'Custom Study Plans',
+      'Unlimited note uploads',
+      'Unlimited AI Tutor',
+      'Advanced performance analytics',
+      '50GB encrypted storage',
+      'Full PYQ database access',
+      'Priority support (2hr SLA)',
+      'Study collaboration rooms',
+      'Offline study mode',
+      'Custom AI study plans',
     ],
   },
   {
-    id: 'elite', name: 'Elite', price: 299, annual: 2399, period: '/month',
-    desc: 'For top rankers & institutions', icon: '👑',
-    color: '#f59e0b', border: 'rgba(245,158,11,0.5)',
+    id: 'elite', name: 'Elite', price: 299, annual: 2399,
+    desc: 'For top rankers and institutions.',
+    accent: 'var(--teal-500)',
+    accentRaw: '#2DD4A8',
     features: [
-      'Everything in Pro', 'Personal AI Mentor (Dedicated)',
-      'Study War Room (Private)', 'DRM-Protected PDF Streaming',
-      '200GB Secure Storage', 'Screenshot Detection', 'Campus Ambassador Access',
-      'Exclusive Elite Resources', 'AI Career Roadmap', '1-on-1 Doubt Solving',
+      'Everything in Pro',
+      'Personal AI mentor (dedicated)',
+      'Private study war room',
+      'DRM-protected PDF streaming',
+      '200GB encrypted storage',
+      'Screenshot detection',
+      'Campus ambassador access',
+      'Exclusive elite resources',
+      'AI career roadmap',
+      '1-on-1 doubt solving sessions',
     ],
   },
 ];
 
 const FAQS = [
-  { q: 'Can I cancel anytime?', a: 'Yes! You can cancel your subscription at any time. Your access continues until the end of your billing period.' },
-  { q: 'Is there a student discount?', a: 'Verify your student email (.edu) and get 20% off on Pro and Elite plans.' },
-  { q: 'How secure is my data?', a: 'We use AES-256 encryption, JWT auth, and ISO 27001 certified infrastructure. Your notes are only visible to you.' },
-  { q: 'Can I download notes for offline use?', a: 'Free and Pro users can download standard notes. Elite users get DRM-protected stream-only PDFs.' },
-  { q: 'Is there a free trial for Pro?', a: 'Yes! Start with a 7-day free Pro trial. No credit card required.' },
+  { q: 'Can I cancel anytime?', a: 'Yes. Cancel your subscription at any time from Settings. Your access continues until the end of the current billing period. No hidden fees, no cancellation charges.' },
+  { q: 'Is there a student discount?', a: 'Verify your student email (.edu or .ac.in) and get 20% off Pro and Elite plans. The discount applies for as long as your student email is active.' },
+  { q: 'How secure is my data?', a: 'All files are encrypted at rest with AES-256 and in transit with TLS 1.3. We use JWT authentication and run on ISO 27001 certified infrastructure. Your notes are only accessible by you.' },
+  { q: 'Can I download notes for offline use?', a: 'Pro users can download all their notes for offline access. Elite users additionally get DRM-protected streaming for premium content.' },
+  { q: 'Is there a free trial for Pro?', a: 'Yes — start with a 7-day free Pro trial. No credit card required. You can downgrade to Starter at any time.' },
 ];
 
 export default function PricingPage() {
   const { isLoaded, userId } = useAuth();
   const isSignedIn = isLoaded && !!userId;
   const [loading, setLoading] = useState<string | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const router = useRouter();
 
   const handleCheckout = async (planId: string) => {
@@ -88,76 +110,335 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-white/20">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b bg-black/80 backdrop-blur-md border-white/10">
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
-              <ArrowRight size={16} className="rotate-180" /> Back to Home
-            </Link>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-4">
-            {!isSignedIn ? (
-              <>
-                <Link href="/auth/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Sign In</Link>
-                <Link href="/auth/signup" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Get Started</Link>
-              </>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Link href="/dashboard" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Go to Dashboard</Link>
-                <div className="border-l border-white/10 pl-4 h-6 flex items-center">
-                  <UserButton appearance={{ elements: { avatarBox: "w-8 h-8 rounded-md" } }} />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+      <NavBar />
 
-      <div className="container mx-auto px-6 py-32">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
-          <span className="badge badge-warning mb-4">Transparent Pricing</span>
-          <h1 className="text-5xl font-black mb-4" style={{ fontFamily: 'Outfit' }}>Choose Your <span className="gradient-text">Study Plan</span></h1>
-          <p className="text-lg text-gray-400">Start free, upgrade when you're ready. No hidden fees. Cancel anytime.</p>
+      {/* Header */}
+      <section style={{ paddingTop: '140px', paddingBottom: '60px', textAlign: 'center', padding: '140px 24px 60px' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p style={{
+            fontFamily: "'Satoshi', sans-serif",
+            fontSize: '0.6875rem',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--amber-500)',
+            marginBottom: '16px',
+          }}>
+            Transparent Pricing
+          </p>
+          <h1 style={{
+            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontSize: 'clamp(2.25rem, 4vw, 3.25rem)',
+            fontWeight: 400,
+            letterSpacing: '-0.035em',
+            lineHeight: 1.1,
+            color: 'var(--text-primary)',
+            marginBottom: '16px',
+          }}>
+            Choose your study plan.
+          </h1>
+          <p style={{
+            fontFamily: "'Satoshi', sans-serif",
+            fontSize: '1.0625rem',
+            color: 'var(--text-secondary)',
+            maxWidth: '480px',
+            margin: '0 auto',
+            lineHeight: 1.6,
+          }}>
+            Start free, upgrade when you're ready. No hidden fees. Cancel anytime.
+          </p>
         </motion.div>
+      </section>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-20">
+      {/* Pricing cards */}
+      <section style={{ padding: '0 24px 80px' }}>
+        <div style={{
+          maxWidth: '1100px',
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '24px',
+          alignItems: 'start',
+        }}
+          className="pricing-grid"
+        >
           {PLANS.map((plan, i) => (
-            <motion.div key={plan.id} initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-              className="relative glass-card p-8 flex flex-col"
-              style={{ borderColor: plan.border, boxShadow: plan.popular ? `0 0 50px ${plan.color}20` : undefined }}>
+            <motion.div
+              key={plan.id}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                background: 'var(--bg-card)',
+                border: plan.popular
+                  ? `1px solid ${plan.accentRaw}40`
+                  : '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-xl)',
+                padding: '32px',
+                position: 'relative',
+                boxShadow: plan.popular ? `0 0 60px ${plan.accentRaw}08` : 'none',
+                transition: 'border-color 0.35s, box-shadow 0.35s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = `${plan.accentRaw}50`;
+                e.currentTarget.style.boxShadow = `0 0 40px ${plan.accentRaw}10`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = plan.popular ? `${plan.accentRaw}40` : 'var(--border-subtle)';
+                e.currentTarget.style.boxShadow = plan.popular ? `0 0 60px ${plan.accentRaw}08` : 'none';
+              }}
+            >
+              {/* Popular badge */}
               {plan.popular && (
-                <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                  <span className="badge badge-primary px-5 py-1.5 text-xs">⚡ Most Popular</span>
+                <div style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
+                  color: '#0A0A0C',
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: '0.6875rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  padding: '4px 16px',
+                  borderRadius: '99px',
+                }}>
+                  Most Popular
                 </div>
               )}
-              <div className="text-3xl mb-4">{plan.icon}</div>
-              <h2 className="text-2xl font-bold mb-1">{plan.name}</h2>
-              <p className="text-xs text-gray-500 mb-6">{plan.desc}</p>
-              <div className="flex items-end gap-1 mb-8">
-                <span className="text-4xl font-black" style={{ color: plan.color, fontFamily: 'Outfit' }}>{plan.price === 0 ? 'Free' : `₹${plan.price}`}</span>
-                {plan.price > 0 && <span className="text-sm pb-1.5 text-gray-500">/mo</span>}
+
+              {/* Plan name */}
+              <h3 style={{
+                fontFamily: "'Satoshi', sans-serif",
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                marginBottom: '4px',
+                letterSpacing: '-0.02em',
+              }}>
+                {plan.name}
+              </h3>
+              <p style={{
+                fontFamily: "'Satoshi', sans-serif",
+                fontSize: '0.8125rem',
+                color: 'var(--text-muted)',
+                marginBottom: '24px',
+              }}>
+                {plan.desc}
+              </p>
+
+              {/* Price */}
+              <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                <span style={{
+                  fontFamily: "'Instrument Serif', serif",
+                  fontSize: '3rem',
+                  fontWeight: 400,
+                  letterSpacing: '-0.03em',
+                  color: plan.accentRaw,
+                  lineHeight: 1,
+                }}>
+                  {plan.price === 0 ? 'Free' : `₹${plan.price}`}
+                </span>
+                {plan.price > 0 && (
+                  <span style={{
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontSize: '0.875rem',
+                    color: 'var(--text-muted)',
+                    fontWeight: 500,
+                  }}>
+                    /month
+                  </span>
+                )}
               </div>
-              <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-gray-400">
-                    <CheckCircle size={14} className="mt-1 shrink-0" style={{ color: plan.color }} /> {f}
+
+              {/* Features */}
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {plan.features.map((f) => (
+                  <li key={f} style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '10px',
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontSize: '0.875rem',
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.5,
+                  }}>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      style={{ flexShrink: 0, marginTop: '2px' }}
+                    >
+                      <path
+                        d="M3 8l3 3 7-7"
+                        stroke={plan.accentRaw}
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    {f}
                   </li>
                 ))}
               </ul>
-              <button 
+
+              {/* CTA */}
+              <button
                 onClick={() => handleCheckout(plan.id)}
                 disabled={!!loading}
-                className="w-full py-3 px-6 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
-                style={{ background: plan.popular ? 'var(--gradient-primary)' : 'rgba(255,255,255,0.05)', color: plan.popular ? 'white' : 'white', border: `1px solid ${plan.border}` }}>
-                {loading === plan.id ? <Loader2 size={16} className="animate-spin" /> : (plan.price === 0 ? 'Start Free' : `Upgrade to ${plan.name}`)}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: 'var(--radius-md)',
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: '0.9375rem',
+                  fontWeight: 700,
+                  cursor: loading ? 'wait' : 'pointer',
+                  transition: 'all 0.25s',
+                  border: plan.popular ? 'none' : `1px solid ${plan.accentRaw}40`,
+                  background: plan.popular
+                    ? 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)'
+                    : 'transparent',
+                  color: plan.popular ? '#0A0A0C' : 'var(--text-primary)',
+                  boxShadow: plan.popular ? '0 4px 16px rgba(232,168,50,0.25)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                }}
+              >
+                {loading === plan.id ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    style={{ width: '16px', height: '16px', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%' }}
+                  />
+                ) : (
+                  plan.price === 0 ? 'Start Free' : `Upgrade to ${plan.name}`
+                )}
               </button>
             </motion.div>
           ))}
         </div>
-      </div>
+      </section>
+
+      {/* FAQ */}
+      <section style={{
+        padding: '80px 24px 120px',
+        borderTop: '1px solid var(--border-subtle)',
+      }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            style={{ textAlign: 'center', marginBottom: '48px' }}
+          >
+            <h2 style={{
+              fontFamily: "'Instrument Serif', Georgia, serif",
+              fontSize: '2rem',
+              fontWeight: 400,
+              letterSpacing: '-0.03em',
+              color: 'var(--text-primary)',
+              marginBottom: '8px',
+            }}>
+              Common questions.
+            </h2>
+            <p style={{
+              fontFamily: "'Satoshi', sans-serif",
+              fontSize: '1rem',
+              color: 'var(--text-secondary)',
+            }}>
+              Everything you need to know about Study Aid pricing.
+            </p>
+          </motion.div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {FAQS.map((faq, i) => (
+              <div
+                key={i}
+                style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  overflow: 'hidden',
+                  transition: 'border-color 0.2s',
+                  borderColor: openFaq === i ? 'rgba(232,168,50,0.2)' : 'var(--border-subtle)',
+                }}
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  style={{
+                    width: '100%',
+                    padding: '18px 20px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontSize: '0.9375rem',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    textAlign: 'left',
+                  }}
+                >
+                  {faq.q}
+                  <motion.span
+                    animate={{ rotate: openFaq === i ? 45 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ fontSize: '1.25rem', color: 'var(--text-muted)', flexShrink: 0, marginLeft: '16px' }}
+                  >
+                    +
+                  </motion.span>
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <p style={{
+                        padding: '0 20px 18px',
+                        fontFamily: "'Satoshi', sans-serif",
+                        fontSize: '0.9375rem',
+                        color: 'var(--text-secondary)',
+                        lineHeight: 1.65,
+                      }}>
+                        {faq.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .pricing-grid {
+            grid-template-columns: 1fr !important;
+            max-width: 440px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

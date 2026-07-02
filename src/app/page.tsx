@@ -1,273 +1,605 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRef } from 'react';
 import Link from 'next/link';
 import { useAuth, UserButton } from '@clerk/nextjs';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Brain, BookOpen, BarChart3, Shield, Clock, Target, Menu, X, ArrowRight,
-  MessageSquare, ChevronRight, Search, Upload, Lock, FileText, CheckCircle
-} from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
-const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
-];
-
-const FEATURES = [
-  { icon: Brain, title: 'AI Tutor', desc: 'Interact with course material instantly using context-aware AI. Ask questions and get answers directly from your documents.', color: '#ededed' },
-  { icon: BookOpen, title: 'Notes Vault', desc: 'Store, search, and organize all your academic documents securely in the cloud.', color: '#ededed' },
-  { icon: BarChart3, title: 'Analytics', desc: 'Track your study patterns and performance over time with precision data.', color: '#ededed' },
-  { icon: Clock, title: 'Smart Planner', desc: 'Organize your revision schedules and assignment deadlines automatically.', color: '#ededed' },
-  { icon: Shield, title: 'Enterprise Security', desc: 'Your data is encrypted and completely private. Built on FAANG-grade infrastructure.', color: '#ededed' },
-  { icon: Target, title: 'Assignment Tracking', desc: 'Never miss a deadline with automated priorities and task management.', color: '#ededed' },
-];
-
-const WORKFLOW = [
-  { title: 'Upload Material', desc: 'Drag and drop your PDFs, DOCX, or images into the secure vault.', icon: Upload },
-  { title: 'AI Processing', desc: 'Our engine indexes your text and prepares it for semantic search.', icon: Brain },
-  { title: 'Search & Learn', desc: 'Ask the AI tutor anything about your documents and learn faster.', icon: Search },
-];
+import NavBar from '@/components/ui/NavBar';
+import Footer from '@/components/ui/Footer';
+import HeroCanvas from '@/components/landing/HeroCanvas';
+import ProofStrip from '@/components/landing/ProofStrip';
+import PipelineSection from '@/components/landing/PipelineSection';
+import FeatureShowcase from '@/components/landing/FeatureShowcase';
+import DemoPreview from '@/components/landing/DemoPreview';
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const { isLoaded, userId } = useAuth();
   const isSignedIn = isLoaded && !!userId;
+  const heroRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  });
+
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-white/20">
-      {/* Sticky Navbar */}
-      <nav
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b"
+    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+      <NavBar />
+
+      {/* ═══════════════════════════════════════
+          HERO SECTION
+          ═══════════════════════════════════════ */}
+      <section
+        ref={heroRef}
         style={{
-          background: scrolled ? 'rgba(0,0,0,0.8)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(12px)' : 'none',
-          borderColor: scrolled ? 'rgba(255,255,255,0.08)' : 'transparent',
+          position: 'relative',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          background: 'var(--gradient-hero)',
         }}
       >
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-white flex items-center justify-center">
-              <Brain size={18} className="text-black" />
+        {/* Canvas neural network */}
+        <HeroCanvas />
+
+        {/* Gradient overlay to ensure text readability */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(ellipse at center, rgba(10,10,12,0.3) 0%, rgba(10,10,12,0.7) 70%)',
+          zIndex: 1,
+          pointerEvents: 'none',
+        }} />
+
+        {/* Hero content */}
+        <motion.div
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            textAlign: 'center',
+            padding: '0 24px',
+            maxWidth: '820px',
+            opacity: heroOpacity,
+            y: heroY,
+            scale: heroScale,
+          }}
+        >
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '6px 16px',
+              borderRadius: '99px',
+              background: 'rgba(232, 168, 50, 0.08)',
+              border: '1px solid rgba(232, 168, 50, 0.2)',
+              fontFamily: "'Satoshi', sans-serif",
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              color: 'var(--amber-400)',
+              marginBottom: '32px',
+            }}>
+              <span style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: 'var(--amber-500)',
+                animation: 'pulseGlow 2s ease-in-out infinite',
+              }} />
+              AI-Powered Academic Platform
+            </span>
+          </motion.div>
+
+          {/* Headline with staggered reveal */}
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              fontFamily: "'Instrument Serif', Georgia, serif",
+              fontSize: 'clamp(2.75rem, 6vw + 1rem, 4.5rem)',
+              fontWeight: 400,
+              letterSpacing: '-0.04em',
+              lineHeight: 1.05,
+              color: 'var(--text-primary)',
+              marginBottom: '24px',
+            }}
+          >
+            Your study vault,{' '}
+            <br className="hidden sm:block" />
+            <span style={{
+              background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 40%, #2DD4A8 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              powered by intelligence.
+            </span>
+          </motion.h1>
+
+          {/* Subheadline */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              fontFamily: "'Satoshi', sans-serif",
+              fontSize: 'clamp(1rem, 1.5vw, 1.1875rem)',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.65,
+              maxWidth: '540px',
+              margin: '0 auto 40px',
+            }}
+          >
+            Upload your notes. Ask the AI tutor anything. 
+            Plan your study schedule. Track your progress.
+            One encrypted platform — zero friction.
+          </motion.p>
+
+          {/* CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px',
+            }}
+          >
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {!isSignedIn ? (
+                <Link
+                  href="/auth/signup"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    color: '#0A0A0C',
+                    textDecoration: 'none',
+                    background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
+                    padding: '0.875rem 2rem',
+                    borderRadius: 'var(--radius-md)',
+                    boxShadow: '0 4px 20px rgba(232, 168, 50, 0.35)',
+                    transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 0 30px rgba(232,168,50,0.4), 0 8px 30px rgba(232,168,50,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(232, 168, 50, 0.35)';
+                  }}
+                >
+                  Start Free
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+              ) : (
+                <Link
+                  href="/dashboard"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    color: '#0A0A0C',
+                    textDecoration: 'none',
+                    background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
+                    padding: '0.875rem 2rem',
+                    borderRadius: 'var(--radius-md)',
+                    boxShadow: '0 4px 20px rgba(232, 168, 50, 0.35)',
+                  }}
+                >
+                  Go to Dashboard →
+                </Link>
+              )}
+
+              <Link
+                href="#features"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  textDecoration: 'none',
+                  background: 'transparent',
+                  border: '1px solid var(--border-default)',
+                  padding: '0.875rem 2rem',
+                  borderRadius: 'var(--radius-md)',
+                  transition: 'border-color 0.2s, background 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--amber-500)';
+                  e.currentTarget.style.background = 'rgba(232,168,50,0.04)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-default)';
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                See How It Works
+              </Link>
             </div>
-            <span className="font-semibold tracking-tight text-lg">StudyAid</span>
-          </Link>
 
-          <div className="hidden md:flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
-              <Link key={link.label} href={link.href} className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
-                {link.label}
-              </Link>
-            ))}
-            {isSignedIn && (
-              <>
-                <Link href="/dashboard/notes" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Notes</Link>
-                <Link href="/dashboard" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Dashboard</Link>
-              </>
-            )}
-          </div>
+            <p style={{
+              fontFamily: "'Satoshi', sans-serif",
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)',
+            }}>
+              No credit card required · Free forever plan available
+            </p>
+          </motion.div>
+        </motion.div>
 
-          <div className="hidden md:flex items-center gap-4">
-            {!isSignedIn ? (
-              <>
-                <Link href="/auth/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Sign In</Link>
-                <Link href="/auth/signup" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Get Started</Link>
-              </>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Link href="/dashboard" className="text-sm font-medium bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Go to Dashboard</Link>
-                <div className="border-l border-white/10 pl-4 h-6 flex items-center">
-                  <UserButton appearance={{ elements: { avatarBox: "w-8 h-8 rounded-md" } }} />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <button className="md:hidden text-gray-400 hover:text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 0.6 }}
+          style={{
+            position: 'absolute',
+            bottom: '40px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          <span style={{
+            fontFamily: "'Satoshi', sans-serif",
+            fontSize: '0.6875rem',
+            fontWeight: 600,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            color: 'var(--text-muted)',
+          }}>
+            Scroll
+          </span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              width: '20px',
+              height: '32px',
+              borderRadius: '10px',
+              border: '1.5px solid var(--carbon-600)',
+              display: 'flex',
+              justifyContent: 'center',
+              paddingTop: '6px',
+            }}
+          >
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-black border-b border-white/10 px-6 py-4"
-            >
-              <div className="flex flex-col gap-4">
-                {NAV_LINKS.map((link) => (
-                  <Link key={link.label} href={link.href} className="text-sm font-medium text-gray-300">{link.label}</Link>
-                ))}
-                {isSignedIn && (
-                  <>
-                    <Link href="/dashboard/notes" className="text-sm font-medium text-gray-300">Notes</Link>
-                    <Link href="/dashboard" className="text-sm font-medium text-gray-300">Dashboard</Link>
-                  </>
-                )}
-                <div className="h-px bg-white/10 my-2" />
-                {!isSignedIn ? (
-                  <>
-                    <Link href="/auth/login" className="text-sm font-medium text-gray-300">Sign In</Link>
-                    <Link href="/auth/signup" className="text-sm font-medium text-white">Get Started</Link>
-                  </>
-                ) : (
-                  <Link href="/dashboard" className="text-sm font-medium text-white">Go to Dashboard</Link>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="pt-40 pb-20 px-6 text-center max-w-4xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs font-medium text-gray-300 mb-8">
-            <Lock size={12} /> Privacy-First Architecture
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
-            The operating system <br className="hidden md:block" />
-            <span className="text-gray-400">for rigorous study.</span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            A unified environment for notes, assignments, and AI-assisted learning. Built on enterprise-grade infrastructure to guarantee security, speed, and focus.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            {!isSignedIn ? (
-              <Link href="/auth/signup" className="w-full sm:w-auto bg-white text-black font-medium text-sm px-8 py-3.5 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                Start Building Your Vault <ArrowRight size={16} />
-              </Link>
-            ) : (
-              <Link href="/dashboard" className="w-full sm:w-auto bg-white text-black font-medium text-sm px-8 py-3.5 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                Enter Dashboard <ArrowRight size={16} />
-              </Link>
-            )}
-            <Link href="#features" className="w-full sm:w-auto bg-transparent border border-white/10 text-white font-medium text-sm px-8 py-3.5 rounded-lg hover:bg-white/5 transition-colors text-center">
-              Explore Platform
-            </Link>
-          </div>
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              style={{
+                width: '3px',
+                height: '8px',
+                borderRadius: '2px',
+                background: 'var(--amber-500)',
+              }}
+            />
+          </motion.div>
         </motion.div>
       </section>
 
-      {/* Trust / Security Section */}
-      <section className="py-12 border-y border-white/10 bg-white/[0.02]">
-        <div className="container mx-auto px-6 text-center">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-widest mb-6">Built on Industry Standards</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale">
-            {['Next.js', 'PostgreSQL', 'Stripe', 'React', 'Tailwind'].map(tech => (
-              <span key={tech} className="font-bold text-lg md:text-xl tracking-tight">{tech}</span>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* How it Works Workflow */}
-      <section id="about" className="py-32 px-6 max-w-6xl mx-auto">
-        <div className="text-center mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">A systemic approach to learning.</h2>
-          <p className="text-gray-400 max-w-xl mx-auto text-lg">No chaos. No distractions. Just a clean pipeline from raw material to deep understanding.</p>
+      {/* ═══════════════════════════════════════
+          PROOF STRIP
+          ═══════════════════════════════════════ */}
+      <ProofStrip />
+
+
+      {/* ═══════════════════════════════════════
+          PROBLEM STATEMENT
+          ═══════════════════════════════════════ */}
+      <ProblemSection />
+
+
+      {/* ═══════════════════════════════════════
+          HOW IT WORKS / PIPELINE
+          ═══════════════════════════════════════ */}
+      <PipelineSection />
+
+
+      {/* ═══════════════════════════════════════
+          FEATURES
+          ═══════════════════════════════════════ */}
+      <FeatureShowcase />
+
+
+      {/* ═══════════════════════════════════════
+          LIVE DEMO
+          ═══════════════════════════════════════ */}
+      <DemoPreview />
+
+
+      {/* ═══════════════════════════════════════
+          FOOTER
+          ═══════════════════════════════════════ */}
+      <Footer />
+    </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════
+   PROBLEM SECTION — Editorial layout
+   ═══════════════════════════════════════ */
+function ProblemSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  });
+
+  const diagramY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+
+  return (
+    <section
+      ref={ref}
+      style={{
+        padding: '120px 24px',
+        borderTop: '1px solid var(--border-subtle)',
+      }}
+    >
+      <div style={{
+        maxWidth: '1240px',
+        margin: '0 auto',
+        display: 'grid',
+        gridTemplateColumns: '7fr 5fr',
+        gap: '80px',
+        alignItems: 'center',
+      }}
+        className="problem-grid"
+      >
+        {/* Pull quote text */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p style={{
+            fontFamily: "'Satoshi', sans-serif",
+            fontSize: '0.6875rem',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--amber-500)',
+            marginBottom: '24px',
+          }}>
+            The Problem
+          </p>
+
+          <h2 style={{
+            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+            fontWeight: 400,
+            letterSpacing: '-0.03em',
+            lineHeight: 1.2,
+            color: 'var(--text-primary)',
+            marginBottom: '24px',
+          }}>
+            Students juggle 6+ apps just to study. 
+            <span style={{ color: 'var(--text-muted)' }}>{' '}Notes in Drive, tasks in Notion, flashcards on Anki, AI on ChatGPT, schedules on Google Calendar.</span>
+          </h2>
+
+          <div style={{
+            borderLeft: '3px solid var(--amber-500)',
+            paddingLeft: '20px',
+            marginTop: '32px',
+          }}>
+            <p style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: '1.375rem',
+              fontWeight: 400,
+              fontStyle: 'italic',
+              lineHeight: 1.5,
+              color: 'var(--text-primary)',
+              marginBottom: '12px',
+            }}>
+              "I spend more time organizing my study tools than actually studying."
+            </p>
+            <p style={{
+              fontFamily: "'Satoshi', sans-serif",
+              fontSize: '0.8125rem',
+              color: 'var(--text-muted)',
+              fontWeight: 600,
+            }}>
+              — Every engineering student, everywhere.
+            </p>
+          </div>
+
+          <p style={{
+            fontFamily: "'Satoshi', sans-serif",
+            fontSize: '1.0625rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.7,
+            marginTop: '32px',
+            maxWidth: '520px',
+          }}>
+            Study Aid replaces the chaos. One platform with your notes, an AI tutor that actually reads your documents, 
+            a smart planner, and analytics to track what works. Encrypted. Fast. Built for focus.
+          </p>
+        </motion.div>
+
+        {/* Diagram */}
+        <motion.div style={{ y: diagramY }}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <FragmentedVsUnifiedDiagram />
+          </motion.div>
+        </motion.div>
+      </div>
+
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .problem-grid {
+            grid-template-columns: 1fr !important;
+            gap: 48px !important;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+function FragmentedVsUnifiedDiagram() {
+  const fragmentedApps = [
+    { name: 'Drive', color: '#4285F4' },
+    { name: 'Notion', color: '#787878' },
+    { name: 'Anki', color: '#2369BD' },
+    { name: 'ChatGPT', color: '#10A37F' },
+    { name: 'Calendar', color: '#EA4335' },
+    { name: 'WhatsApp', color: '#25D366' },
+  ];
+
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '32px',
+    }}>
+      {/* Fragmented */}
+      <div style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: 'var(--radius-lg)',
+        padding: '24px',
+      }}>
+        <div style={{
+          fontFamily: "'Satoshi', sans-serif",
+          fontSize: '0.6875rem',
+          fontWeight: 700,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: 'var(--accent-danger)',
+          marginBottom: '16px',
+        }}>
+          ✕ Before — Fragmented
         </div>
-        
-        <div className="grid md:grid-cols-3 gap-8 relative">
-          <div className="hidden md:block absolute top-1/2 left-10 right-10 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-y-1/2" />
-          
-          {WORKFLOW.map((step, i) => (
-            <div key={step.title} className="relative z-10 bg-black border border-white/10 p-8 rounded-2xl flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mb-6">
-                <step.icon size={20} className="text-gray-300" />
-              </div>
-              <h3 className="text-lg font-bold mb-2">{step.title}</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{step.desc}</p>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '8px',
+        }}>
+          {fragmentedApps.map((app) => (
+            <div key={app.name} style={{
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '10px',
+              textAlign: 'center',
+              fontFamily: "'Satoshi', sans-serif",
+              fontSize: '0.6875rem',
+              fontWeight: 600,
+              color: 'var(--text-muted)',
+            }}>
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '6px',
+                background: `${app.color}20`,
+                border: `1px solid ${app.color}30`,
+                margin: '0 auto 6px',
+              }} />
+              {app.name}
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* Features Grid */}
-      <section id="features" className="py-32 px-6 bg-white/[0.01] border-t border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Engineered for focus.</h2>
-            <p className="text-gray-400 text-lg max-w-2xl">Every module is designed to eliminate friction and keep you in the flow state.</p>
-          </div>
+      {/* Arrow */}
+      <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="bg-black border border-white/10 p-8 rounded-2xl hover:border-white/20 transition-colors group">
-                <f.icon size={24} className="mb-6 text-gray-400 group-hover:text-white transition-colors" />
-                <h3 className="text-lg font-bold mb-3">{f.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
+      {/* Unified */}
+      <div style={{
+        background: 'var(--bg-card)',
+        border: '1px solid rgba(232,168,50,0.2)',
+        borderRadius: 'var(--radius-lg)',
+        padding: '24px',
+        boxShadow: '0 0 40px rgba(232,168,50,0.05)',
+      }}>
+        <div style={{
+          fontFamily: "'Satoshi', sans-serif",
+          fontSize: '0.6875rem',
+          fontWeight: 700,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: 'var(--amber-500)',
+          marginBottom: '16px',
+        }}>
+          ✓ After — Study Aid
         </div>
-      </section>
-
-      {/* Clean Footer */}
-      <footer className="border-t border-white/10 py-16 px-6 bg-black">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 mb-16">
-          <div className="col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 rounded bg-white flex items-center justify-center">
-                <Brain size={14} className="text-black" />
-              </div>
-              <span className="font-semibold tracking-tight text-sm">StudyAid</span>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          background: 'rgba(232,168,50,0.06)',
+          border: '1px solid rgba(232,168,50,0.12)',
+          borderRadius: 'var(--radius-md)',
+          padding: '16px',
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: 'var(--radius-sm)',
+            background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: "'Instrument Serif', serif",
+            fontSize: '20px',
+            color: '#0A0A0C',
+            flexShrink: 0,
+          }}>S</div>
+          <div>
+            <div style={{ fontFamily: "'Satoshi', sans-serif", fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Study Aid
             </div>
-            <p className="text-sm text-gray-500 max-w-xs">The authentic, database-driven operating system for modern students.</p>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold text-sm mb-4">Product</h4>
-            <ul className="space-y-3">
-              <li><Link href="#features" className="text-sm text-gray-500 hover:text-white transition-colors">Features</Link></li>
-              <li><Link href="/pricing" className="text-sm text-gray-500 hover:text-white transition-colors">Pricing</Link></li>
-              <li><Link href="/dashboard/notes" className="text-sm text-gray-500 hover:text-white transition-colors">Notes</Link></li>
-              <li><Link href="/dashboard" className="text-sm text-gray-500 hover:text-white transition-colors">Dashboard</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-sm mb-4">Company</h4>
-            <ul className="space-y-3">
-              <li><Link href="/about" className="text-sm text-gray-500 hover:text-white transition-colors">About</Link></li>
-              <li><Link href="/careers" className="text-sm text-gray-500 hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="/blog" className="text-sm text-gray-500 hover:text-white transition-colors">Blog</Link></li>
-              <li><Link href="/contact" className="text-sm text-gray-500 hover:text-white transition-colors">Contact</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-sm mb-4">Legal & Support</h4>
-            <ul className="space-y-3">
-              <li><Link href="/privacy" className="text-sm text-gray-500 hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="text-sm text-gray-500 hover:text-white transition-colors">Terms of Service</Link></li>
-              <li><Link href="/refunds" className="text-sm text-gray-500 hover:text-white transition-colors">Refund Policy</Link></li>
-              <li><Link href="/help" className="text-sm text-gray-500 hover:text-white transition-colors">Help Center</Link></li>
-            </ul>
+            <div style={{ fontFamily: "'Satoshi', sans-serif", fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Notes · AI Tutor · Planner · Analytics · Collaboration
+            </div>
           </div>
         </div>
-
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between pt-8 border-t border-white/10 text-xs text-gray-600">
-          <p>© {new Date().getFullYear()} Study Aid. All rights reserved.</p>
-          <div className="flex gap-4 mt-4 md:mt-0">
-            <Link href="https://linkedin.com" className="hover:text-gray-300">LinkedIn</Link>
-            <Link href="https://x.com" className="hover:text-gray-300">X</Link>
-            <Link href="https://github.com" className="hover:text-gray-300">GitHub</Link>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }

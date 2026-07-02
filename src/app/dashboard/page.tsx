@@ -26,10 +26,10 @@ const cardHover = {
 };
 
 const KPI_COLORS = [
-  { gradient: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.08))', border: 'rgba(99,102,241,0.25)', accent: '#818cf8', glow: 'rgba(99,102,241,0.2)' },
-  { gradient: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(234,88,12,0.08))', border: 'rgba(245,158,11,0.25)', accent: '#fbbf24', glow: 'rgba(245,158,11,0.2)' },
-  { gradient: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.08))', border: 'rgba(16,185,129,0.25)', accent: '#34d399', glow: 'rgba(16,185,129,0.2)' },
-  { gradient: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(99,102,241,0.08))', border: 'rgba(6,182,212,0.25)', accent: '#22d3ee', glow: 'rgba(6,182,212,0.2)' },
+  { gradient: 'linear-gradient(135deg, rgba(232,168,50,0.12), rgba(240,192,96,0.06))', border: 'rgba(232,168,50,0.2)', accent: '#E8A832', glow: 'rgba(232,168,50,0.15)' },
+  { gradient: 'linear-gradient(135deg, rgba(45,212,168,0.1), rgba(56,189,248,0.06))', border: 'rgba(45,212,168,0.2)', accent: '#2DD4A8', glow: 'rgba(45,212,168,0.15)' },
+  { gradient: 'linear-gradient(135deg, rgba(240,192,96,0.1), rgba(232,168,50,0.06))', border: 'rgba(240,192,96,0.2)', accent: '#F0C060', glow: 'rgba(240,192,96,0.12)' },
+  { gradient: 'linear-gradient(135deg, rgba(56,189,248,0.1), rgba(45,212,168,0.06))', border: 'rgba(56,189,248,0.2)', accent: '#38BDF8', glow: 'rgba(56,189,248,0.12)' },
 ];
 
 function AnimatedCounter({ value, suffix = '' }: { value: string, suffix?: string }) {
@@ -79,7 +79,7 @@ export default function DashboardPage() {
       {/* Greeting Section */}
       <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: 'Outfit' }}>
+          <h2 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: "'Instrument Serif', serif" }}>
             <span className="gradient-text">{getGreeting()}, {firstName}!</span>{' '}
             <motion.span
               className="inline-block"
@@ -97,10 +97,10 @@ export default function DashboardPage() {
           <motion.div
             className="flex items-center gap-2 px-4 py-2 rounded-xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08))',
-              border: '1px solid rgba(99,102,241,0.2)',
+              background: 'linear-gradient(135deg, rgba(232,168,50,0.1), rgba(240,192,96,0.06))',
+              border: '1px solid rgba(232,168,50,0.15)',
             }}
-            whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(99,102,241,0.15)' }}
+            whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(232,168,50,0.12)' }}
           >
             <motion.span
               className="text-lg"
@@ -114,10 +114,10 @@ export default function DashboardPage() {
           <motion.div
             className="flex items-center gap-2 px-4 py-2 rounded-xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.06))',
-              border: '1px solid rgba(16,185,129,0.2)',
+              background: 'linear-gradient(135deg, rgba(45,212,168,0.1), rgba(14,184,134,0.05))',
+              border: '1px solid rgba(45,212,168,0.15)',
             }}
-            whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(16,185,129,0.15)' }}
+            whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(45,212,168,0.12)' }}
           >
             <Star size={14} style={{ color: 'var(--accent-success)' }} />
             <span className="text-sm font-bold" style={{ color: 'var(--accent-success)' }}>XP: {data?.stats?.xp || 0}</span>
@@ -191,13 +191,13 @@ export default function DashboardPage() {
             {isNewUser && (
               <motion.div variants={fadeInUp} className="glass-card p-8 relative overflow-hidden"
                 style={{
-                  borderColor: 'rgba(99,102,241,0.2)',
-                  background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(139,92,246,0.03), rgba(6,182,212,0.02))',
+                  borderColor: 'rgba(232,168,50,0.15)',
+                  background: 'linear-gradient(135deg, rgba(232,168,50,0.04), rgba(45,212,168,0.02), rgba(56,189,248,0.01))',
                 }}>
                 {/* Animated background glow */}
                 <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
                   style={{
-                    background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(232,168,50,0.06) 0%, transparent 70%)',
                     filter: 'blur(40px)',
                   }} />
 
@@ -215,9 +215,9 @@ export default function DashboardPage() {
                 </p>
                 <div className="grid sm:grid-cols-3 gap-4 relative z-10">
                   {[
-                    { title: 'Upload Notes', desc: 'Add your first PDF or DOCX', href: '/dashboard/upload', icon: UploadCloud, color: '#818cf8' },
-                    { title: 'Set a Goal', desc: 'Create a study assignment', href: '/dashboard/planner', icon: Target, color: '#34d399' },
-                    { title: 'Ask AI', desc: 'Try your first AI Tutor query', href: '/dashboard/ai-tutor', icon: Brain, color: '#22d3ee' },
+                    { title: 'Upload Notes', desc: 'Add your first PDF or DOCX', href: '/dashboard/upload', icon: UploadCloud, color: '#E8A832' },
+                    { title: 'Set a Goal', desc: 'Create a study assignment', href: '/dashboard/planner', icon: Target, color: '#2DD4A8' },
+                    { title: 'Ask AI', desc: 'Try your first AI Tutor query', href: '/dashboard/ai-tutor', icon: Brain, color: '#38BDF8' },
                   ].map((step, idx) => (
                     <motion.div key={idx} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Link href={step.href}
@@ -252,7 +252,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-bold flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                      style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)' }}>
+                      style={{ background: 'rgba(232,168,50,0.1)', border: '1px solid rgba(232,168,50,0.15)' }}>
                       <BookOpen size={16} style={{ color: 'var(--accent-primary)' }} />
                     </div>
                     Latest Notes
@@ -293,7 +293,7 @@ export default function DashboardPage() {
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                              style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)' }}>
+                              style={{ background: 'rgba(232,168,50,0.06)', border: '1px solid rgba(232,168,50,0.12)' }}>
                               <BookOpen size={14} style={{ color: 'var(--accent-primary)' }} />
                             </div>
                             <div>
@@ -315,7 +315,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-bold flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                      style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                      style={{ background: 'rgba(45,212,168,0.1)', border: '1px solid rgba(45,212,168,0.15)' }}>
                       <Target size={16} style={{ color: 'var(--accent-success)' }} />
                     </div>
                     Study Plan
@@ -357,10 +357,10 @@ export default function DashboardPage() {
                           <motion.div
                             className="w-5 h-5 rounded-md flex-shrink-0"
                             style={{
-                              border: '2px solid rgba(16,185,129,0.4)',
-                              background: 'rgba(16,185,129,0.08)',
+                              border: '2px solid rgba(45,212,168,0.35)',
+                              background: 'rgba(45,212,168,0.06)',
                             }}
-                            whileHover={{ scale: 1.2, borderColor: 'rgba(16,185,129,0.8)' }}
+                            whileHover={{ scale: 1.2, borderColor: 'rgba(45,212,168,0.7)' }}
                           />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{a.title}</p>
