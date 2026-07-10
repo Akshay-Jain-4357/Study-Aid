@@ -352,15 +352,6 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
             whileTap={{ scale: 0.92 }}
           >
             <Bell size={16} />
-            <motion.span
-              className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-              style={{
-                background: 'var(--gradient-amber)',
-                boxShadow: 'var(--shadow-amber-glow)',
-              }}
-              animate={{ scale: [1, 1.3, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
           </motion.button>
 
           <AnimatePresence>

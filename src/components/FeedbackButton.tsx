@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Loader2 } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
+import { usePathname } from 'next/navigation';
 
 export default function FeedbackButton() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState('FEATURE');
   const [message, setMessage] = useState('');
@@ -36,6 +38,9 @@ export default function FeedbackButton() {
       setStatus('error');
     }
   };
+
+  // Hide the feedback button on the AI Tutor page so it doesn't overlap the chat input
+  if (pathname?.includes('/ai-tutor')) return null;
 
   return (
     <>
