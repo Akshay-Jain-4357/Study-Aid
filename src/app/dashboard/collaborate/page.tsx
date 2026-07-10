@@ -8,7 +8,6 @@ import Link from 'next/link';
 export default function CollaboratePage() {
   return (
     <div className="space-y-6">
-    <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         className="flex flex-col sm:flex-row justify-between gap-4">
         <div>
