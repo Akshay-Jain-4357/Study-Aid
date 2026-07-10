@@ -11,7 +11,7 @@ import {
   Brain, BookOpen, BarChart3, Clock, Target, Users, Settings,
   LogOut, Menu, X, Bell, Search, Zap, Home, Trophy, Shield,
   CreditCard, Star, TrendingUp, MessageSquare, ChevronLeft,
-  Lock, Store, Sun, Moon, Sparkles
+  Lock, Store, Sun, Moon, Sparkles, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -41,10 +41,12 @@ interface Stats {
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
   stats: Stats | null;
 }
 
-function Sidebar({ open, onClose, stats }: SidebarProps) {
+function Sidebar({ open, onClose, isCollapsed, onToggleCollapse, stats }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useUser();
   const userName = user?.fullName || 'Student';
@@ -72,7 +74,7 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
       <motion.aside
         initial={false}
         animate={{ x: open ? 0 : undefined }}
-        className={`sidebar ${open ? 'open' : ''}`}
+        className={`sidebar ${open ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}
         style={{
           background: 'var(--sidebar-bg)',
           backdropFilter: 'blur(var(--glass-blur-heavy))',
@@ -92,7 +94,7 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
         <div className="flex items-center justify-between mb-8 relative z-10">
           <Link href="/" className="flex items-center gap-2.5 group">
             <motion.div
-              className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden"
+              className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden flex-shrink-0"
               style={{ background: 'var(--gradient-amber)' }}
               whileHover={{ scale: 1.08, rotate: -2 }}
               whileTap={{ scale: 0.95 }}
@@ -101,7 +103,7 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
               <span className="text-[#0A0A0C] font-bold text-sm relative z-10" style={{ fontFamily: "'Instrument Serif', serif" }}>S</span>
               <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.div>
-            <span className="font-bold text-lg" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+            <span className="font-bold text-lg hide-on-collapse" style={{ fontFamily: "'Satoshi', sans-serif" }}>
               Study<span className="gradient-text">Aid</span>
             </span>
           </Link>
@@ -113,7 +115,7 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
 
         {/* User Card */}
         <motion.div
-          className="glass-card p-3 mb-6 flex items-center gap-3 relative z-10"
+          className="glass-card p-3 mb-6 flex items-center gap-3 relative z-10 hide-on-collapse"
           style={{
             borderRadius: 'var(--radius-lg)',
             background: 'var(--bg-glass-card)',
@@ -141,7 +143,7 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 flex flex-col gap-0.5 overflow-y-auto relative z-10">
-          <div className="text-[10px] font-bold mb-2 px-3 uppercase tracking-[0.1em]"
+          <div className="text-[10px] font-bold mb-2 px-3 uppercase tracking-[0.1em] hide-on-collapse"
             style={{ color: 'var(--text-muted)' }}>
             Main Menu
           </div>
@@ -186,51 +188,6 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
           })}
         </nav>
 
-        {/* Streak Card */}
-        <motion.div
-          className="my-4 p-4 rounded-2xl relative overflow-hidden z-10"
-          style={{
-            background: 'var(--gradient-card-hover)',
-            border: '1px solid var(--border-amber-subtle)',
-          }}
-          whileHover={{
-            borderColor: 'rgba(232, 168, 50, 0.3)',
-            boxShadow: '0 0 24px rgba(232, 168, 50, 0.08)',
-          }}
-          transition={{ duration: 0.4 }}
-        >
-          {/* Animated shimmer overlay */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="w-full h-full animate-shimmer"
-              style={{
-                background: 'var(--gradient-shimmer)',
-              }} />
-          </div>
-          <div className="flex items-center gap-2 mb-2 relative z-10">
-            <motion.span
-              className="text-xl"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
-            >
-              🔥
-            </motion.span>
-            <span className="font-bold text-sm tracking-tight">{stats?.streak || 0} Day Streak!</span>
-          </div>
-          <p className="text-[10px] leading-normal relative z-10" style={{ color: 'var(--text-muted)' }}>
-            Keep it going! Every day counts toward mastery.
-          </p>
-          <div className="h-1.5 w-full rounded-full mt-3 overflow-hidden relative z-10"
-            style={{ background: 'var(--bg-overlay)' }}>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: stats?.streak ? '100%' : '10%' }}
-              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-              className="h-full rounded-full"
-              style={{ background: 'var(--gradient-amber)' }}
-            />
-          </div>
-        </motion.div>
-
         {/* Bottom Nav */}
         <div className="flex flex-col gap-0.5 pt-2 relative z-10" style={{ borderTop: '1px solid var(--border-subtle)' }}>
           {BOTTOM_NAV.map((item) => (
@@ -242,9 +199,18 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
           <SignOutButton>
             <button className="nav-link w-full text-left" style={{ color: 'var(--accent-danger)' }}>
               <LogOut size={17} />
-              Sign Out
+              <span>Sign Out</span>
             </button>
           </SignOutButton>
+          
+          <button 
+            onClick={onToggleCollapse}
+            className="nav-link w-full text-left hidden lg:flex mt-2" 
+            style={{ color: 'var(--text-muted)' }}
+          >
+            {isCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
+            <span>{isCollapsed ? 'Expand' : 'Collapse'}</span>
+          </button>
         </div>
       </motion.aside>
     </>
@@ -397,6 +363,28 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
           <ThemeToggle />
         </div>
 
+        {/* Streak Badge */}
+        <motion.div
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl cursor-pointer"
+          style={{
+            background: 'var(--bg-hover-strong)',
+            border: '1px solid var(--border-amber-subtle)',
+          }}
+          whileHover={{ scale: 1.05, boxShadow: 'var(--shadow-amber-glow)', borderColor: 'rgba(232, 168, 50, 0.4)' }}
+          title={`${stats?.streak || 0} Day Streak!`}
+        >
+          <motion.span
+            className="text-[14px]"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+          >
+            🔥
+          </motion.span>
+          <span className="text-xs font-bold tracking-wide" style={{ color: 'var(--accent-warning)' }}>
+            {stats?.streak || 0}
+          </span>
+        </motion.div>
+
         {/* Credits Badge */}
         <motion.div
           className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl"
@@ -442,6 +430,7 @@ const pageTransition = {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const pathname = usePathname();
 
@@ -465,8 +454,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg-base)' }}>
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} stats={stats} />
-      <div className="main-content">
+      <Sidebar 
+        open={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)} 
+        isCollapsed={isCollapsed}
+        onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+        stats={stats} 
+      />
+      <div className={`main-content ${isCollapsed ? 'collapsed' : ''}`}>
         <TopBar onMenuClick={() => setSidebarOpen(true)} stats={stats} />
         <main className="p-6 relative z-10">
           <AnimatePresence mode="wait">
