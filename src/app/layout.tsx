@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import ClientClerkProvider from '@/components/ClientClerkProvider';
 import FeedbackButton from '@/components/FeedbackButton';
 import ThemeProvider from '@/components/ThemeProvider';
-import { dark } from '@clerk/themes';
 import './globals.css';
 
 export const metadata: Metadata = {
