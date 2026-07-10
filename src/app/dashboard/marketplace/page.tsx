@@ -11,55 +11,64 @@ export default function MarketplacePage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-8 rounded-3xl border border-indigo-500/20">
-        <div className="flex-1 text-center sm:text-left">
-          <span className="badge badge-primary mb-3">Creator Economy</span>
-          <h2 className="text-3xl font-black mb-2" style={{ fontFamily: 'Outfit' }}>The Student Marketplace</h2>
-          <p className="text-sm text-indigo-200 max-w-lg mb-6 leading-relaxed mx-auto sm:mx-0">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="flex flex-col sm:flex-row justify-between items-center gap-4 p-8 rounded-3xl border relative overflow-hidden group" style={{ background: 'var(--bg-hover-strong)', borderColor: 'var(--border-amber-medium)' }}>
+        <div className="absolute inset-0 bg-amber-500/5 transition-opacity opacity-0 group-hover:opacity-100" />
+        <div className="flex-1 text-center sm:text-left relative z-10">
+          <span className="badge badge-primary mb-4">Creator Economy</span>
+          <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: "'Instrument Serif', serif", color: 'var(--amber-400)' }}>The Student Marketplace</h2>
+          <p className="text-sm font-medium max-w-lg mb-8 leading-relaxed mx-auto sm:mx-0" style={{ color: 'var(--text-secondary)' }}>
             The authentic peer-to-peer ecosystem. Buy and sell premium study materials, notes, and expert mentorship.
           </p>
-          <button className="btn-primary text-sm px-8 py-2.5 shadow-lg shadow-indigo-500/20 flex items-center gap-2 mx-auto sm:mx-0">
+          <button className="btn-primary px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg hover:scale-105 transition-transform flex items-center gap-2 mx-auto sm:mx-0">
             <PlusCircle size={16} /> Become a Creator
           </button>
         </div>
-        <div className="hidden md:block w-48 h-48 relative">
-           <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-full" />
-           <div className="absolute inset-0 flex items-center justify-center text-6xl">🛍️</div>
+        <div className="hidden md:block w-48 h-48 relative z-10">
+           <div className="absolute inset-0 rounded-full blur-3xl opacity-50" style={{ background: 'var(--gradient-amber)' }} />
+           <div className="absolute inset-0 flex items-center justify-center text-[5rem] drop-shadow-2xl filter hover:scale-110 transition-transform cursor-pointer">🛍️</div>
         </div>
       </motion.div>
 
       {/* Nav & Search */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-        <div className="flex gap-2 overflow-x-auto w-full sm:w-auto scrollbar-none">
-          {['All', 'Notes Packs', 'Mentorship', 'Video Courses', 'Toolkits'].map(f => (
-            <button key={f} onClick={() => setActiveFilter(f)}
-              className={`whitespace-nowrap px-4 py-2 rounded-xl text-sm font-semibold transition-all ${activeFilter === f ? 'bg-white text-black' : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/5'}`}>
+        <div className="flex gap-2 overflow-x-auto w-full sm:w-auto scrollbar-none pb-2 sm:pb-0">
+          {['All', 'Notes Packs', 'Mentorship', 'Video Courses', 'Toolkits'].map((f, i) => (
+            <motion.button 
+              key={f} 
+              initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + (i * 0.05), type: 'spring', stiffness: 300, damping: 25 }}
+              onClick={() => setActiveFilter(f)}
+              className="whitespace-nowrap px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border shadow-sm"
+              style={{
+                background: activeFilter === f ? 'var(--text-primary)' : 'var(--bg-input)',
+                borderColor: activeFilter === f ? 'var(--text-primary)' : 'var(--border-strong)',
+                color: activeFilter === f ? 'var(--bg-base)' : 'var(--text-muted)'
+              }}>
               {f}
-            </button>
+            </motion.button>
           ))}
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-64 px-4 py-2 bg-white/5 border border-white/10 rounded-xl">
-          <Search size={16} className="text-white/40" />
-          <input placeholder="Search marketplace..." className="bg-transparent border-none outline-none text-sm w-full" />
-        </div>
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="flex items-center gap-3 w-full sm:w-64 px-5 py-3 rounded-xl border transition-all" style={{ background: 'var(--bg-input)', borderColor: 'var(--border-strong)' }}>
+          <Search size={16} style={{ color: 'var(--text-muted)' }} />
+          <input placeholder="Search marketplace..." className="bg-transparent border-none outline-none text-sm font-medium w-full placeholder:text-white/20" style={{ color: 'var(--text-primary)' }} />
+        </motion.div>
       </div>
 
       {/* Empty State Grid */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-        className="glass-card min-h-[400px] flex flex-col items-center justify-center text-center p-12">
-        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 border border-white/10 relative">
-          <Store size={32} className="text-gray-400" />
-          <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-black rounded-full flex items-center justify-center border border-white/10">
-            <Lock size={14} className="text-gray-500" />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 25 }}
+        className="glass-surface min-h-[400px] flex flex-col items-center justify-center text-center p-12 rounded-3xl" style={{ background: 'var(--bg-glass-card)', borderColor: 'var(--border-subtle)' }}>
+        <div className="w-24 h-24 rounded-[2rem] flex items-center justify-center mb-8 border relative shadow-lg" style={{ background: 'var(--bg-hover)', borderColor: 'var(--border-strong)' }}>
+          <Store size={40} style={{ color: 'var(--text-muted)' }} />
+          <div className="absolute -bottom-3 -right-3 w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-strong)' }}>
+            <Lock size={16} style={{ color: 'var(--text-muted)' }} />
           </div>
         </div>
-        <h3 className="text-2xl font-bold mb-3 font-outfit">Marketplace is Opening Soon</h3>
-        <p className="text-sm text-gray-400 max-w-md mx-auto mb-8 leading-relaxed">
+        <h3 className="text-3xl font-bold mb-3" style={{ fontFamily: "'Instrument Serif', serif", color: 'var(--text-primary)' }}>Marketplace is Opening Soon</h3>
+        <p className="text-sm font-medium max-w-md mx-auto mb-10 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           We are currently onboarding top student creators. No public listings are available yet. Start building your personal vault first!
         </p>
         <div className="flex gap-4">
-          <Link href="/dashboard/upload" className="btn-primary py-2.5 px-6 rounded-xl text-sm font-medium flex items-center gap-2">
+          <Link href="/dashboard/upload" className="btn-primary py-3 px-8 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg hover:scale-105 transition-transform">
              Upload Your First Note
           </Link>
         </div>

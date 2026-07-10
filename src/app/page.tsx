@@ -111,7 +111,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
             style={{
               fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 'clamp(2.75rem, 6vw + 1rem, 4.5rem)',
+              fontSize: 'clamp(3rem, 7vw, 5rem)',
               fontWeight: 400,
               letterSpacing: '-0.04em',
               lineHeight: 1.05,
@@ -121,12 +121,7 @@ export default function LandingPage() {
           >
             Your study vault,{' '}
             <br className="hidden sm:block" />
-            <span style={{
-              background: 'linear-gradient(135deg, #E8A832 0%, #F0C060 40%, #2DD4A8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}>
+            <span className="gradient-text">
               powered by intelligence.
             </span>
           </motion.h1>
@@ -162,10 +157,11 @@ export default function LandingPage() {
               gap: '16px',
             }}
           >
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
               {!isSignedIn ? (
                 <Link
                   href="/auth/signup"
+                  className="btn-primary"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -173,10 +169,8 @@ export default function LandingPage() {
                     fontFamily: "'Satoshi', sans-serif",
                     fontSize: '1rem',
                     fontWeight: 700,
-                    color: '#0A0A0C',
                     textDecoration: 'none',
-                    background: 'var(--gradient-amber)',
-                    padding: '0.875rem 2rem',
+                    padding: '1rem 2.5rem',
                     borderRadius: 'var(--radius-md)',
                     boxShadow: 'var(--shadow-amber-glow)',
                     transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s',
@@ -196,6 +190,7 @@ export default function LandingPage() {
               ) : (
                 <Link
                   href="/dashboard"
+                  className="btn-primary"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -203,10 +198,8 @@ export default function LandingPage() {
                     fontFamily: "'Satoshi', sans-serif",
                     fontSize: '1rem',
                     fontWeight: 700,
-                    color: '#0A0A0C',
                     textDecoration: 'none',
-                    background: 'var(--gradient-amber)',
-                    padding: '0.875rem 2rem',
+                    padding: '1rem 2.5rem',
                     borderRadius: 'var(--radius-md)',
                     boxShadow: 'var(--shadow-amber-glow)',
                   }}
@@ -217,6 +210,7 @@ export default function LandingPage() {
 
               <Link
                 href="#features"
+                className="glass-surface"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -226,19 +220,18 @@ export default function LandingPage() {
                   fontWeight: 600,
                   color: 'var(--text-primary)',
                   textDecoration: 'none',
-                  background: 'transparent',
-                  border: '1px solid var(--border-default)',
-                  padding: '0.875rem 2rem',
+                  padding: '1rem 2.5rem',
                   borderRadius: 'var(--radius-md)',
                   transition: 'border-color 0.2s, background 0.2s',
+                  borderColor: 'var(--border-strong)',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = 'var(--amber-500)';
                   e.currentTarget.style.background = 'var(--bg-hover-light)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border-default)';
-                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderColor = 'var(--border-strong)';
+                  e.currentTarget.style.background = 'var(--bg-glass-card)';
                 }}
               >
                 See How It Works

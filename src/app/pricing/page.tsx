@@ -131,14 +131,14 @@ export default function PricingPage() {
           }}>
             Transparent Pricing
           </p>
-          <h1 style={{
+          <h1 className="gradient-text" style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
             fontSize: 'clamp(2.25rem, 4vw, 3.25rem)',
             fontWeight: 400,
             letterSpacing: '-0.035em',
             lineHeight: 1.1,
-            color: 'var(--text-primary)',
             marginBottom: '16px',
+            display: 'inline-block'
           }}>
             Choose your study plan.
           </h1>
@@ -172,30 +172,20 @@ export default function PricingPage() {
               key={plan.id}
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
+              className={`glass-surface p-8 relative transition-all group hover:scale-[1.02] ${plan.popular ? 'border shadow-2xl scale-[1.02]' : 'border'}`}
               style={{
-                background: 'var(--bg-card)',
-                border: plan.popular
-                  ? `1px solid ${plan.accentRaw}40`
-                  : '1px solid var(--border-subtle)',
+                background: plan.popular ? 'var(--bg-hover-strong)' : 'var(--bg-glass-card)',
+                borderColor: plan.popular ? `${plan.accentRaw}60` : 'var(--border-subtle)',
                 borderRadius: 'var(--radius-xl)',
-                padding: '32px',
-                position: 'relative',
-                boxShadow: plan.popular ? `0 0 60px ${plan.accentRaw}08` : 'none',
-                transition: 'border-color 0.35s, box-shadow 0.35s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = `${plan.accentRaw}50`;
-                e.currentTarget.style.boxShadow = `0 0 40px ${plan.accentRaw}10`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = plan.popular ? `${plan.accentRaw}40` : 'var(--border-subtle)';
-                e.currentTarget.style.boxShadow = plan.popular ? `0 0 60px ${plan.accentRaw}08` : 'none';
               }}
             >
+              {plan.popular && (
+                <div className="absolute inset-0 rounded-[var(--radius-xl)] pointer-events-none animate-pulse" style={{ background: `radial-gradient(circle at 50% 0%, ${plan.accentRaw}20 0%, transparent 60%)` }} />
+              )}
               {/* Popular badge */}
               {plan.popular && (
-                <div style={{
+                <div className="shadow-lg" style={{
                   position: 'absolute',
                   top: '-12px',
                   left: '50%',
@@ -366,13 +356,12 @@ export default function PricingPage() {
             {FAQS.map((faq, i) => (
               <div
                 key={i}
+                className="glass-surface transition-all"
                 style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
                   overflow: 'hidden',
-                  transition: 'border-color 0.2s',
                   borderColor: openFaq === i ? 'var(--border-amber-medium)' : 'var(--border-subtle)',
+                  background: openFaq === i ? 'var(--bg-hover)' : 'var(--bg-glass-card)',
                 }}
               >
                 <button
