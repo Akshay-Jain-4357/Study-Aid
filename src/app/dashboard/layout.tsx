@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { UserButton, useUser, SignOutButton } from '@clerk/nextjs';
@@ -57,8 +57,14 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-40 lg:hidden"
             onClick={onClose}
+            style={{
+              background: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+            }}
           />
         )}
       </AnimatePresence>
@@ -67,15 +73,34 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
         initial={false}
         animate={{ x: open ? 0 : undefined }}
         className={`sidebar ${open ? 'open' : ''}`}
+        style={{
+          background: 'var(--sidebar-bg)',
+          backdropFilter: 'blur(var(--glass-blur-heavy))',
+          WebkitBackdropFilter: 'blur(var(--glass-blur-heavy))',
+        }}
       >
+        {/* Ambient glow — decorative */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 left-0 w-full h-48"
+          style={{
+            background: 'radial-gradient(ellipse at 30% 0%, rgba(232,168,50,0.06) 0%, transparent 70%)',
+          }}
+        />
+
         {/* Brand Logo */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 relative z-10">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden"
-              style={{ background: 'var(--gradient-amber)' }}>
+            <motion.div
+              className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden"
+              style={{ background: 'var(--gradient-amber)' }}
+              whileHover={{ scale: 1.08, rotate: -2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            >
               <span className="text-[#0A0A0C] font-bold text-sm relative z-10" style={{ fontFamily: "'Instrument Serif', serif" }}>S</span>
               <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
+            </motion.div>
             <span className="font-bold text-lg" style={{ fontFamily: "'Satoshi', sans-serif" }}>
               Study<span className="gradient-text">Aid</span>
             </span>
@@ -87,7 +112,20 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
         </div>
 
         {/* User Card */}
-        <div className="glass-card p-3 mb-6 flex items-center gap-3" style={{ borderRadius: 'var(--radius-lg)' }}>
+        <motion.div
+          className="glass-card p-3 mb-6 flex items-center gap-3 relative z-10"
+          style={{
+            borderRadius: 'var(--radius-lg)',
+            background: 'var(--bg-glass-card)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+          }}
+          whileHover={{
+            borderColor: 'var(--border-amber-subtle)',
+            boxShadow: '0 0 20px rgba(232, 168, 50, 0.06)',
+          }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="flex-shrink-0">
             <UserButton appearance={{ elements: { avatarBox: "w-10 h-10 rounded-xl" } }} />
           </div>
@@ -99,10 +137,10 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
               </span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Navigation */}
-        <nav className="flex-1 flex flex-col gap-0.5 overflow-y-auto">
+        <nav className="flex-1 flex flex-col gap-0.5 overflow-y-auto relative z-10">
           <div className="text-[10px] font-bold mb-2 px-3 uppercase tracking-[0.1em]"
             style={{ color: 'var(--text-muted)' }}>
             Main Menu
@@ -114,16 +152,25 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={`nav-link ${isActive ? 'active' : ''}`}
+                onClick={() => onClose()}
               >
                 <motion.div
-                  className="flex items-center justify-center w-8 h-8 rounded-lg"
+                  className="flex items-center justify-center w-8 h-8 rounded-lg relative"
                   style={{
                     background: isActive ? 'var(--bg-hover-strong)' : 'transparent',
                   }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 >
-                  <item.icon size={17} style={{ color: isActive ? 'var(--accent-primary)' : undefined }} />
+                  <item.icon
+                    size={17}
+                    style={{
+                      color: isActive ? 'var(--accent-primary)' : undefined,
+                      filter: isActive ? 'drop-shadow(0 0 6px rgba(232, 168, 50, 0.4))' : 'none',
+                      transition: 'filter 0.3s, color 0.3s',
+                    }}
+                  />
                 </motion.div>
                 <span className="flex-1">{item.label}</span>
                 {item.premium && (
@@ -140,11 +187,18 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
         </nav>
 
         {/* Streak Card */}
-        <div className="my-4 p-4 rounded-2xl relative overflow-hidden"
+        <motion.div
+          className="my-4 p-4 rounded-2xl relative overflow-hidden z-10"
           style={{
             background: 'var(--gradient-card-hover)',
             border: '1px solid var(--border-amber-subtle)',
-          }}>
+          }}
+          whileHover={{
+            borderColor: 'rgba(232, 168, 50, 0.3)',
+            boxShadow: '0 0 24px rgba(232, 168, 50, 0.08)',
+          }}
+          transition={{ duration: 0.4 }}
+        >
           {/* Animated shimmer overlay */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="w-full h-full animate-shimmer"
@@ -170,15 +224,15 @@ function Sidebar({ open, onClose, stats }: SidebarProps) {
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: stats?.streak ? '100%' : '10%' }}
-              transition={{ duration: 1.5, ease: 'easeOut' }}
+              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
               className="h-full rounded-full"
               style={{ background: 'var(--gradient-amber)' }}
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* Bottom Nav */}
-        <div className="flex flex-col gap-0.5 pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+        <div className="flex flex-col gap-0.5 pt-2 relative z-10" style={{ borderTop: '1px solid var(--border-subtle)' }}>
           {BOTTOM_NAV.map((item) => (
             <Link key={item.href} href={item.href} className="nav-link">
               <item.icon size={17} />
@@ -205,7 +259,15 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
 
   const [showNotifs, setShowNotifs] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Scroll-reactive topbar
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -220,11 +282,12 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
   return (
     <header className="sticky top-0 z-30 flex items-center gap-4 px-6 h-16"
       style={{
-        background: 'var(--topbar-bg)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderBottom: '1px solid var(--border-subtle)',
-        transition: 'background 0.4s ease',
+        background: scrolled ? 'var(--topbar-bg)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(var(--glass-blur-heavy))' : 'blur(8px)',
+        WebkitBackdropFilter: scrolled ? 'blur(var(--glass-blur-heavy))' : 'blur(8px)',
+        borderBottom: scrolled ? '1px solid var(--border-subtle)' : '1px solid transparent',
+        boxShadow: scrolled ? 'var(--shadow-sm)' : 'none',
+        transition: 'all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)',
       }}>
       <button onClick={onMenuClick}
         className="lg:hidden p-2 rounded-xl transition-all hover:scale-105"
@@ -255,8 +318,12 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
             border: `1px solid ${searchFocused ? 'var(--accent-primary)' : 'var(--border-subtle)'}`,
             boxShadow: searchFocused ? 'var(--shadow-amber-glow)' : 'none',
             minWidth: 220,
-            transition: 'all 0.3s ease',
+            transition: 'all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)',
           }}
+          animate={{
+            scale: searchFocused ? 1.02 : 1,
+          }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           <Search size={15} style={{ color: searchFocused ? 'var(--accent-primary)' : 'var(--text-muted)' }} />
           <input
@@ -305,9 +372,11 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 className="absolute right-0 mt-2 w-80 rounded-2xl shadow-2xl overflow-hidden"
                 style={{
-                  background: 'var(--glass-bg)',
-                  backdropFilter: 'blur(24px)',
+                  background: 'var(--glass-bg-heavy)',
+                  backdropFilter: 'blur(var(--glass-blur-heavy))',
+                  WebkitBackdropFilter: 'blur(var(--glass-blur-heavy))',
                   border: '1px solid var(--border-default)',
+                  boxShadow: 'var(--shadow-xl)',
                 }}
               >
                 <div className="p-3.5 flex justify-between items-center"
@@ -363,9 +432,27 @@ function TopBar({ onMenuClick, stats }: { onMenuClick: () => void, stats: Stats 
   );
 }
 
+// Page transition variants
+const pageTransition = {
+  initial: { opacity: 0, y: 16, filter: 'blur(4px)' },
+  animate: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  },
+  exit: {
+    opacity: 0,
+    y: -8,
+    filter: 'blur(2px)',
+    transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] as const },
+  },
+};
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     async function fetchStats() {
@@ -380,19 +467,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     fetchStats();
   }, []);
 
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg-base)' }}>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} stats={stats} />
       <div className="main-content">
         <TopBar onMenuClick={() => setSidebarOpen(true)} stats={stats} />
         <main className="p-6 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-          >
-            {children}
-          </motion.div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              variants={pageTransition}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

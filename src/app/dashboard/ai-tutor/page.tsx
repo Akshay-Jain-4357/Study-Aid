@@ -39,25 +39,28 @@ function MessageBubble({ msg }: { msg: AIMessage }) {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex gap-3 ${isAI ? 'flex-row' : 'flex-row-reverse'}`}>
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} className={`flex gap-3 ${isAI ? 'flex-row' : 'flex-row-reverse'}`}>
       {isAI ? (
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'var(--gradient-primary)' }}>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg" style={{ background: 'var(--gradient-primary)' }}>
           <Brain size={16} color="white" />
         </div>
       ) : (
-        <div className="avatar flex-shrink-0" style={{ width: 32, height: 32, fontSize: '0.7rem' }}>A</div>
+        <div className="w-8 h-8 rounded-xl flex flex-shrink-0 items-center justify-center font-bold text-xs shadow-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}>You</div>
       )}
 
       <div className={`max-w-[85%] ${isAI ? '' : 'flex flex-col items-end'}`}>
-        <div className="px-4 py-3 rounded-2xl" style={{
-            background: isAI ? 'rgba(15,15,25,0.8)' : 'rgba(99,102,241,0.2)',
-            border: isAI ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(99,102,241,0.35)',
-            borderRadius: isAI ? '4px 18px 18px 18px' : '18px 4px 18px 18px',
+        <div className="px-5 py-4 rounded-2xl shadow-sm" style={{
+            background: isAI ? 'var(--bg-glass-card)' : 'rgba(232, 168, 50, 0.1)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: isAI ? '1px solid var(--border-subtle)' : '1px solid rgba(232, 168, 50, 0.25)',
+            borderRadius: isAI ? '4px 20px 20px 20px' : '20px 4px 20px 20px',
+            color: 'var(--text-primary)'
           }}>
-          {isAI ? renderContent(msg.content) : <p className="text-sm">{msg.content}</p>}
+          {isAI ? renderContent(msg.content) : <p className="text-sm font-medium">{msg.content}</p>}
         </div>
         {isAI && (
-          <div className="flex items-center gap-1.5 mt-1.5 ml-1">
+          <div className="flex items-center gap-1.5 mt-2 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button onClick={handleCopy} className="p-1 rounded hover:bg-white/10 transition-all text-xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
               <Copy size={11} /> {copied ? 'Copied' : 'Copy'}
             </button>
@@ -123,21 +126,30 @@ export default function AITutorPage() {
     <div className="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)]">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-        className="glass-card p-4 mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--gradient-primary)' }}>
+        className="glass-surface p-4 mb-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <motion.div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg relative" style={{ background: 'var(--gradient-primary)' }}
+            whileHover={{ scale: 1.05, rotate: 5 }}
+          >
             <Brain size={20} color="white" />
-          </div>
+            <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 hover:opacity-100 transition-opacity" />
+          </motion.div>
           <div>
             <h2 className="font-bold text-sm">Study Aid AI Tutor</h2>
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Online · Real-time Responses</span>
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Online · GPT-4</span>
             </div>
           </div>
         </div>
-        <button onClick={() => setMessages([{ id: '0', role: 'assistant', content: INITIAL_MSG, timestamp: new Date() }])}
-          className="p-2 rounded-lg hover:bg-white/10 transition-all text-gray-400"><RefreshCw size={15} /></button>
+        <motion.button onClick={() => setMessages([{ id: '0', role: 'assistant', content: INITIAL_MSG, timestamp: new Date() }])}
+          className="p-2 rounded-xl transition-all"
+          style={{ background: 'var(--bg-hover)', color: 'var(--text-muted)' }}
+          whileHover={{ scale: 1.05, background: 'var(--bg-hover-strong)', color: 'var(--text-primary)' }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <RefreshCw size={15} />
+        </motion.button>
       </motion.div>
 
       {/* Messages */}
@@ -167,32 +179,52 @@ export default function AITutorPage() {
 
       {/* Starter Prompts */}
       {messages.length <= 1 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
           {STARTER_PROMPTS.map((p, i) => (
-            <button key={i} onClick={() => sendMessage(p.text)} className="glass-card p-3 text-left hover:border-indigo-500/40 transition-all">
-              <div className="flex items-center gap-2 mb-1">
-                <p.icon size={13} className="text-indigo-400" />
-                <span className="text-[10px] uppercase font-bold text-indigo-400/60">{p.category}</span>
+            <motion.button
+              key={i} onClick={() => sendMessage(p.text)}
+              className="glass-surface p-4 text-left group"
+              whileHover={{ scale: 1.02, borderColor: 'var(--border-amber-subtle)', boxShadow: 'var(--shadow-amber-glow)' }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <p.icon size={14} style={{ color: 'var(--accent-primary)' }} />
+                <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--text-muted)' }}>{p.category}</span>
               </div>
-              <p className="text-xs text-gray-400">{p.text}</p>
-            </button>
+              <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{p.text}</p>
+            </motion.button>
           ))}
         </div>
       )}
 
       {/* Input */}
-      <div className="glass-card p-3 flex items-end gap-3 rounded-2xl mb-4">
+      <div className="glass-surface-heavy p-2 pl-4 flex items-end gap-3 rounded-2xl mb-4 relative shadow-lg">
+        {/* Animated focus glow */}
+        <div className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300 opacity-0 focus-within:opacity-100"
+          style={{ boxShadow: '0 0 0 1px var(--amber-500), 0 0 20px rgba(232,168,50,0.1)' }} />
+        
         <textarea
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
           placeholder="Ask me anything..."
-          className="flex-1 bg-transparent text-sm outline-none resize-none py-1"
+          className="flex-1 bg-transparent text-sm font-medium outline-none resize-none py-3 relative z-10"
+          style={{ color: 'var(--text-primary)' }}
           rows={1}
         />
-        <button onClick={() => sendMessage(input)} disabled={!input.trim() || isTyping} className="btn-primary p-2.5 rounded-xl disabled:opacity-40">
-          <Send size={16} />
-        </button>
+        <motion.button
+          onClick={() => sendMessage(input)}
+          disabled={!input.trim() || isTyping}
+          className="p-3 rounded-xl relative z-10 text-black font-bold disabled:opacity-50"
+          style={{ background: 'var(--gradient-amber)' }}
+          whileHover={{ scale: input.trim() && !isTyping ? 1.05 : 1 }}
+          whileTap={{ scale: input.trim() && !isTyping ? 0.95 : 1 }}
+        >
+          <Send size={18} />
+        </motion.button>
       </div>
     </div>
   );

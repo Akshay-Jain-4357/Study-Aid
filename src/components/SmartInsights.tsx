@@ -35,24 +35,66 @@ export default function SmartInsights() {
   }, []);
 
   if (loading) return (
-    <div className="glass-card p-4 flex items-center gap-3 animate-pulse">
-      <Loader2 size={16} className="text-indigo-400 animate-spin" />
-      <div className="h-4 w-48 bg-white/5 rounded" />
-    </div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="glass-card p-4 relative overflow-hidden flex items-center gap-4"
+      style={{ border: '1px solid var(--border-subtle)', background: 'var(--bg-glass-card)' }}
+    >
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(90deg, transparent 0%, var(--bg-hover-light) 50%, transparent 100%)',
+        animation: 'shimmer 2s infinite',
+      }} />
+      <div className="w-10 h-10 rounded-xl bg-white/5 flex-shrink-0" />
+      <div className="flex-1 space-y-2">
+        <div className="h-2 w-24 bg-white/10 rounded-full" />
+        <div className="h-3 w-3/4 bg-white/5 rounded-full" />
+      </div>
+    </motion.div>
   );
 
   if (!insight) return null;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="glass-card p-4 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 border-indigo-500/20">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-          <Lightbulb size={16} className="text-indigo-400" />
-        </div>
+    <motion.div
+      initial={{ opacity: 0, y: 16, scale: 0.98, filter: 'blur(4px)' }}
+      animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+      transition={{ duration: 0.5, type: 'spring', stiffness: 300, damping: 25 }}
+      className="glass-surface p-4 relative overflow-hidden group"
+      style={{
+        background: 'var(--bg-glass-card)',
+        borderColor: 'var(--border-teal-subtle)',
+      }}
+      whileHover={{
+        borderColor: 'var(--accent-secondary)',
+        boxShadow: 'var(--shadow-teal-glow)',
+      }}
+    >
+      {/* Dynamic Aurora Glow */}
+      <div className="absolute inset-0 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-700"
+        style={{ background: 'var(--gradient-aurora)' }} />
+
+      <div className="flex items-center gap-4 relative z-10">
+        <motion.div
+          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: 'var(--bg-hover-strong)', border: '1px solid var(--border-teal-subtle)' }}
+          whileHover={{ rotate: 10, scale: 1.05 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        >
+          <Lightbulb size={18} style={{ color: 'var(--accent-secondary)' }} />
+          <motion.div
+            className="absolute inset-0 rounded-xl"
+            animate={{ boxShadow: ['0 0 0px transparent', '0 0 12px rgba(45,212,168,0.4)', '0 0 0px transparent'] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        </motion.div>
         <div>
-          <p className="text-[10px] uppercase tracking-wider font-bold text-indigo-400/60 mb-0.5">AI Study Insight</p>
-          <p className="text-sm font-medium leading-relaxed">{insight}</p>
+          <p className="text-[10px] uppercase tracking-[0.15em] font-bold mb-0.5 flex items-center gap-1.5"
+            style={{ color: 'var(--accent-secondary)' }}>
+            <Sparkles size={10} />
+            AI Insight
+          </p>
+          <p className="text-sm font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+            {insight}
+          </p>
         </div>
       </div>
     </motion.div>

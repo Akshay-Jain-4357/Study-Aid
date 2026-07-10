@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import {
   Brain, BookOpen, Target, Clock, ArrowRight, UploadCloud, Star, Sparkles, Zap, ChevronRight
@@ -11,18 +11,13 @@ import { getGreeting, formatDate } from '@/lib/utils';
 import SmartInsights from '@/components/SmartInsights';
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
+  initial: { opacity: 0, y: 24, filter: 'blur(4px)' },
+  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
   transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
 };
 
 const stagger = {
-  animate: { transition: { staggerChildren: 0.1 } }
-};
-
-const cardHover = {
-  rest: { scale: 1, y: 0 },
-  hover: { scale: 1.02, y: -4, transition: { duration: 0.3, ease: 'easeOut' as const } },
+  animate: { transition: { staggerChildren: 0.08 } }
 };
 
 const KPI_COLORS = [
@@ -32,17 +27,86 @@ const KPI_COLORS = [
   { gradient: 'linear-gradient(135deg, rgba(56,189,248,0.1), rgba(45,212,168,0.06))', border: 'rgba(56,189,248,0.2)', accent: '#38BDF8', glow: 'rgba(56,189,248,0.12)' },
 ];
 
-function AnimatedCounter({ value, suffix = '' }: { value: string, suffix?: string }) {
+/**
+ * Mouse-reactive KPI card with subtle 3D tilt and ambient glow
+ */
+function KpiCard({ kpi, idx }: { kpi: { label: string; value: string; unit: string; icon: any }; idx: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+
+  const rotateX = useSpring(useTransform(mouseY, [0, 1], [4, -4]), { stiffness: 200, damping: 20 });
+  const rotateY = useSpring(useTransform(mouseX, [0, 1], [-4, 4]), { stiffness: 200, damping: 20 });
+  const glowX = useTransform(mouseX, [0, 1], ['0%', '100%']);
+  const glowY = useTransform(mouseY, [0, 1], ['0%', '100%']);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width);
+    mouseY.set((e.clientY - rect.top) / rect.height);
+  }, [mouseX, mouseY]);
+
+  const handleMouseLeave = useCallback(() => {
+    mouseX.set(0.5);
+    mouseY.set(0.5);
+  }, [mouseX, mouseY]);
+
+  const colors = KPI_COLORS[idx];
+  const Icon = kpi.icon;
+
   return (
-    <motion.span
-      key={value}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-      style={{ fontFamily: 'Outfit' }}
+    <motion.div
+      ref={ref}
+      className="stat-card group cursor-default relative"
+      style={{
+        background: colors.gradient,
+        borderColor: colors.border,
+        rotateX,
+        rotateY,
+        transformPerspective: 800,
+        transformStyle: 'preserve-3d',
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      whileHover={{ scale: 1.03, y: -4 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
-      {value}<span className="text-sm font-normal ml-1" style={{ color: 'var(--text-muted)' }}>{suffix}</span>
-    </motion.span>
+      {/* Mouse-reactive ambient glow */}
+      <motion.div
+        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{
+          background: useTransform(
+            [glowX, glowY],
+            ([x, y]) => `radial-gradient(circle at ${x} ${y}, ${colors.glow}, transparent 60%)`
+          ),
+        }}
+      />
+
+      {/* Card content */}
+      <motion.div
+        className="w-11 h-11 rounded-xl flex items-center justify-center mb-3 relative z-10"
+        style={{
+          background: `${colors.accent}15`,
+          border: `1px solid ${colors.accent}30`,
+        }}
+        whileHover={{ rotate: [0, -10, 10, 0], transition: { duration: 0.5 } }}
+      >
+        <Icon size={20} style={{ color: colors.accent }} />
+      </motion.div>
+      <div className="text-2xl font-black mb-1 relative z-10" style={{ color: colors.accent }}>
+        <motion.span
+          key={kpi.value}
+          initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {kpi.value}
+          <span className="text-sm font-normal ml-1" style={{ color: 'var(--text-muted)' }}>{kpi.unit}</span>
+        </motion.span>
+      </div>
+      <div className="text-xs font-medium relative z-10" style={{ color: 'var(--text-muted)' }}>{kpi.label}</div>
+    </motion.div>
   );
 }
 
@@ -101,6 +165,7 @@ export default function DashboardPage() {
               border: '1px solid var(--border-amber-subtle)',
             }}
             whileHover={{ scale: 1.05, boxShadow: 'var(--shadow-amber-glow)' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
             <motion.span
               className="text-lg"
@@ -118,6 +183,7 @@ export default function DashboardPage() {
               border: '1px solid rgba(45,212,168,0.15)',
             }}
             whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(45,212,168,0.12)' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
             <Star size={14} style={{ color: 'var(--accent-success)' }} />
             <span className="text-sm font-bold" style={{ color: 'var(--accent-success)' }}>XP: {data?.stats?.xp || 0}</span>
@@ -135,7 +201,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="h-36 rounded-2xl overflow-hidden relative"
-                  style={{ background: 'var(--glass-bg)', border: '1px solid var(--border-subtle)' }}>
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
                   <div className="absolute inset-0" style={{
                     background: 'linear-gradient(90deg, transparent 0%, var(--bg-hover) 50%, transparent 100%)',
                     animation: 'shimmer 1.5s infinite',
@@ -146,7 +212,7 @@ export default function DashboardPage() {
           </motion.div>
         ) : (
           <motion.div key="content" variants={stagger} className="space-y-8">
-            {/* KPI Cards */}
+            {/* KPI Cards — Mouse-reactive */}
             <motion.div variants={fadeInUp} className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: 'Notes Uploaded', value: notesCount.toString(), unit: 'files', icon: BookOpen },
@@ -154,36 +220,7 @@ export default function DashboardPage() {
                 { label: 'Study Streak', value: (data?.stats?.streak || 0).toString(), unit: 'days', icon: Clock },
                 { label: 'AI Credits', value: data?.stats?.credits || 'PRO', unit: '', icon: Brain },
               ].map((kpi, idx) => (
-                <motion.div
-                  key={kpi.label}
-                  className="stat-card group cursor-default"
-                  variants={cardHover}
-                  initial="rest"
-                  whileHover="hover"
-                  style={{
-                    background: KPI_COLORS[idx].gradient,
-                    borderColor: KPI_COLORS[idx].border,
-                  }}
-                >
-                  {/* Glow effect on hover */}
-                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{ boxShadow: `0 0 30px ${KPI_COLORS[idx].glow}, inset 0 0 30px ${KPI_COLORS[idx].glow}` }} />
-
-                  <motion.div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center mb-3 relative z-10"
-                    style={{
-                      background: `${KPI_COLORS[idx].accent}15`,
-                      border: `1px solid ${KPI_COLORS[idx].accent}30`,
-                    }}
-                    whileHover={{ rotate: [0, -10, 10, 0], transition: { duration: 0.5 } }}
-                  >
-                    <kpi.icon size={20} style={{ color: KPI_COLORS[idx].accent }} />
-                  </motion.div>
-                  <div className="text-2xl font-black mb-1 relative z-10" style={{ color: KPI_COLORS[idx].accent }}>
-                    <AnimatedCounter value={kpi.value} suffix={kpi.unit} />
-                  </div>
-                  <div className="text-xs font-medium relative z-10" style={{ color: 'var(--text-muted)' }}>{kpi.label}</div>
-                </motion.div>
+                <KpiCard key={kpi.label} kpi={kpi} idx={idx} />
               ))}
             </motion.div>
 
@@ -219,11 +256,16 @@ export default function DashboardPage() {
                     { title: 'Set a Goal', desc: 'Create a study assignment', href: '/dashboard/planner', icon: Target, color: '#2DD4A8' },
                     { title: 'Ask AI', desc: 'Try your first AI Tutor query', href: '/dashboard/ai-tutor', icon: Brain, color: '#38BDF8' },
                   ].map((step, idx) => (
-                    <motion.div key={idx} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <motion.div
+                      key={idx}
+                      whileHover={{ y: -4, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    >
                       <Link href={step.href}
                         className="block p-5 rounded-xl transition-all group"
                         style={{
-                          background: 'var(--glass-bg)',
+                          background: 'var(--bg-card)',
                           border: '1px solid var(--border-subtle)',
                         }}>
                         <motion.div
@@ -286,10 +328,11 @@ export default function DashboardPage() {
                           whileHover={{
                             borderColor: 'var(--border-strong)',
                             x: 4,
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
                           }}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: idx * 0.05 }}
+                          transition={{ delay: idx * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -349,10 +392,11 @@ export default function DashboardPage() {
                           whileHover={{
                             borderColor: 'var(--border-strong)',
                             x: 4,
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
                           }}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: idx * 0.05 }}
+                          transition={{ delay: idx * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
                         >
                           <motion.div
                             className="w-5 h-5 rounded-md flex-shrink-0"
