@@ -20,6 +20,10 @@ export default function LoginPage() {
       >
         <SignIn
           appearance={{
+            variables: {
+              colorText: "white",
+              colorInputText: "white",
+            },
             elements: {
               card: "bg-[#0f0f19]/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-2xl",
               headerTitle: "text-white font-bold font-outfit",
